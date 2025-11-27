@@ -56,16 +56,63 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
       }),
       Table.configure({
         resizable: true,
+        HTMLAttributes: {
+          class: 'border-collapse w-full',
+        },
       }),
       TableRow,
-      TableHeader,
-      TableCell,
+      TableHeader.configure({
+        HTMLAttributes: {
+          class: 'border border-border p-2 bg-muted font-semibold',
+        },
+      }),
+      TableCell.configure({
+        HTMLAttributes: {
+          class: 'border border-border p-2',
+        },
+      }),
       Image.configure({
         inline: true,
         allowBase64: true,
+        HTMLAttributes: {
+          class: 'max-w-full h-auto',
+        },
       }),
     ],
     content,
+    editorProps: {
+      handlePaste: (view, event) => {
+        const items = Array.from(event.clipboardData?.items || []);
+        
+        // Check if there are any image files in the clipboard
+        const imageItems = items.filter(item => item.type.indexOf('image') !== -1);
+        
+        if (imageItems.length > 0) {
+          event.preventDefault();
+          
+          imageItems.forEach(item => {
+            const blob = item.getAsFile();
+            if (blob) {
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                const base64 = e.target?.result as string;
+                editor?.chain().focus().setImage({ src: base64 }).run();
+              };
+              reader.readAsDataURL(blob);
+            }
+          });
+          
+          return true;
+        }
+
+        // Let Tiptap handle HTML paste (including tables from Word)
+        // by returning false to use default behavior
+        return false;
+      },
+      attributes: {
+        class: 'prose prose-sm max-w-none p-4 min-h-[300px] focus:outline-none',
+      },
+    },
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
@@ -388,7 +435,7 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
 
       <EditorContent
         editor={editor}
-        className="prose prose-sm max-w-none p-4 min-h-[300px] focus:outline-none [&_table]:border-collapse [&_table]:w-full [&_td]:border [&_td]:border-border [&_td]:p-2 [&_th]:border [&_th]:border-border [&_th]:p-2 [&_th]:bg-muted [&_th]:font-semibold [&_img]:max-w-full [&_img]:h-auto"
+        className="[&_table]:border-collapse [&_table]:w-full [&_table]:my-4 [&_td]:border [&_td]:border-border [&_td]:p-2 [&_td]:min-w-[100px] [&_th]:border [&_th]:border-border [&_th]:p-2 [&_th]:bg-muted [&_th]:font-semibold [&_th]:text-left [&_img]:max-w-full [&_img]:h-auto [&_img]:my-2"
       />
     </div>
   );
