@@ -156,14 +156,9 @@ const Downloads = () => {
             Back to Subjects
           </Button>
 
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-2 bg-gradient-primary bg-clip-text text-transparent">
-              {subject ? `${subject.code} - ${subject.title}` : "Downloads"}
-            </h1>
-            <p className="text-muted-foreground text-lg">
-              Access course materials and attachments
-            </p>
-          </div>
+          <h1 className="text-2xl font-bold mb-6">
+            {subject ? `${subject.code} - ${subject.title}` : "Downloads"}
+          </h1>
 
           {!loading && attachments.length > 0 && (
             <div className="mb-6 flex items-center gap-4">
@@ -202,7 +197,7 @@ const Downloads = () => {
               </CardContent>
             </Card>
           ) : (
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredAttachments.map((attachment) => (
                 <Card key={attachment.id} className="hover:shadow-elegant transition-shadow">
                   <CardHeader>
