@@ -34,6 +34,12 @@ import {
   Type,
   Table as TableIcon,
   ImagePlus,
+  TableProperties,
+  Rows,
+  Columns,
+  Trash2,
+  Merge,
+  Split,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
@@ -431,6 +437,82 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
             </div>
           </div>
         </div>
+
+        {/* Table Controls - Show when cursor is inside a table */}
+        {editor.isActive("table") && (
+          <div className="flex flex-wrap gap-1 items-center pt-2 border-t">
+            <Label className="text-xs font-medium mr-2">Table:</Label>
+            
+            <ToolbarButton
+              onClick={() => editor.chain().focus().addRowBefore().run()}
+              title="Add Row Above"
+            >
+              <Rows className="h-4 w-4" />
+            </ToolbarButton>
+
+            <ToolbarButton
+              onClick={() => editor.chain().focus().addRowAfter().run()}
+              title="Add Row Below"
+            >
+              <Rows className="h-4 w-4" />
+            </ToolbarButton>
+
+            <ToolbarButton
+              onClick={() => editor.chain().focus().deleteRow().run()}
+              title="Delete Row"
+            >
+              <Trash2 className="h-4 w-4" />
+            </ToolbarButton>
+
+            <Separator orientation="vertical" className="h-8" />
+
+            <ToolbarButton
+              onClick={() => editor.chain().focus().addColumnBefore().run()}
+              title="Add Column Left"
+            >
+              <Columns className="h-4 w-4" />
+            </ToolbarButton>
+
+            <ToolbarButton
+              onClick={() => editor.chain().focus().addColumnAfter().run()}
+              title="Add Column Right"
+            >
+              <Columns className="h-4 w-4" />
+            </ToolbarButton>
+
+            <ToolbarButton
+              onClick={() => editor.chain().focus().deleteColumn().run()}
+              title="Delete Column"
+            >
+              <Trash2 className="h-4 w-4" />
+            </ToolbarButton>
+
+            <Separator orientation="vertical" className="h-8" />
+
+            <ToolbarButton
+              onClick={() => editor.chain().focus().mergeCells().run()}
+              title="Merge Cells"
+            >
+              <Merge className="h-4 w-4" />
+            </ToolbarButton>
+
+            <ToolbarButton
+              onClick={() => editor.chain().focus().splitCell().run()}
+              title="Split Cell"
+            >
+              <Split className="h-4 w-4" />
+            </ToolbarButton>
+
+            <Separator orientation="vertical" className="h-8" />
+
+            <ToolbarButton
+              onClick={() => editor.chain().focus().deleteTable().run()}
+              title="Delete Table"
+            >
+              <TableProperties className="h-4 w-4" />
+            </ToolbarButton>
+          </div>
+        )}
       </div>
 
       <EditorContent
