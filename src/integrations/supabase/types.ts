@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       attachments: {
         Row: {
+          category: string
           created_at: string | null
           deleted_at: string | null
           file_name: string
@@ -28,6 +29,7 @@ export type Database = {
           uploaded_by: string | null
         }
         Insert: {
+          category?: string
           created_at?: string | null
           deleted_at?: string | null
           file_name: string
@@ -40,6 +42,7 @@ export type Database = {
           uploaded_by?: string | null
         }
         Update: {
+          category?: string
           created_at?: string | null
           deleted_at?: string | null
           file_name?: string
