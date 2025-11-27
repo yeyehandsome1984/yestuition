@@ -27,7 +27,7 @@ const AttachmentUploader = () => {
   const [selectedSubject, setSelectedSubject] = useState("");
   const [selectedModule, setSelectedModule] = useState("");
   const [title, setTitle] = useState("");
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
@@ -73,10 +73,13 @@ const AttachmentUploader = () => {
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-      if (!title) {
-        setTitle(e.target.files[0].name);
+    if (e.target.files && e.target.files.length > 0) {
+      const selectedFiles = Array.from(e.target.files);
+      setFiles(selectedFiles);
+      if (!title && selectedFiles.length === 1) {
+        setTitle(selectedFiles[0].name);
+      } else if (!title && selectedFiles.length > 1) {
+        setTitle(`${selectedFiles.length} files`);
       }
     }
   };
@@ -84,7 +87,7 @@ const AttachmentUploader = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!file || !selectedModule || !title) {
+    if (files.length === 0 || !selectedModule || !title) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -92,31 +95,29 @@ const AttachmentUploader = () => {
     setUploading(true);
 
     try {
-      // For now, we'll store a placeholder file path since storage bucket isn't set up yet
+      // For now, we'll store placeholder file paths since storage bucket isn't set up yet
       // In production, you would upload to Supabase Storage first
-      const filePath = `placeholder/${Date.now()}_${file.name}`;
+      const attachments = files.map((file) => ({
+        module_id: selectedModule,
+        title: files.length === 1 ? title : `${title} - ${file.name}`,
+        file_name: file.name,
+        file_path: `placeholder/${Date.now()}_${file.name}`,
+        file_type: file.type,
+        file_size: file.size
+      }));
 
-      const { error } = await supabase.from("attachments").insert([
-        {
-          module_id: selectedModule,
-          title: title,
-          file_name: file.name,
-          file_path: filePath,
-          file_type: file.type,
-          file_size: file.size
-        }
-      ]);
+      const { error } = await supabase.from("attachments").insert(attachments);
 
       if (error) {
-        toast.error("Failed to upload attachment");
+        toast.error("Failed to upload attachments");
         return;
       }
 
-      toast.success("Attachment uploaded successfully");
+      toast.success(`${files.length} attachment(s) uploaded successfully`);
       
       // Reset form
       setTitle("");
-      setFile(null);
+      setFiles([]);
       setSelectedModule("");
       setSelectedSubject("");
       
@@ -217,12 +218,13 @@ const AttachmentUploader = () => {
                   type="file"
                   onChange={handleFileChange}
                   accept=".pdf,.doc,.docx,.zip,.png,.jpg,.jpeg"
+                  multiple
                   required
                 />
-                {file && (
+                {files.length > 0 && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <File className="h-4 w-4" />
-                    {(file.size / 1024 / 1024).toFixed(2)} MB
+                    {files.length} file(s) - {(files.reduce((acc, f) => acc + f.size, 0) / 1024 / 1024).toFixed(2)} MB
                   </div>
                 )}
               </div>

@@ -151,9 +151,11 @@ const ModuleManager = () => {
     });
   };
 
-  const handleDialogClose = () => {
-    setDialogOpen(false);
-    resetForm();
+  const handleDialogChange = (open: boolean) => {
+    setDialogOpen(open);
+    if (!open) {
+      resetForm();
+    }
   };
 
   const parentModules = modules.filter(m => !m.parent_id);
@@ -164,7 +166,7 @@ const ModuleManager = () => {
 
   return (
     <div className="space-y-4">
-      <Dialog open={dialogOpen} onOpenChange={handleDialogClose}>
+      <Dialog open={dialogOpen} onOpenChange={handleDialogChange}>
         <DialogTrigger asChild>
           <Button className="w-full sm:w-auto">
             <Plus className="mr-2 h-4 w-4" />
@@ -267,7 +269,7 @@ const ModuleManager = () => {
               </div>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={handleDialogClose}>
+              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancel
               </Button>
               <Button type="submit">
