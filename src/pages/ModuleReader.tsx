@@ -28,7 +28,9 @@ import {
 interface Module {
   id: string;
   title: string;
-  description: string;
+  key_concept: string | null;
+  prelim_year_tested: string | null;
+  a_level_year_tested: string | null;
   content: string;
   subject_id: string;
 }
@@ -42,7 +44,7 @@ interface Subject {
 interface Submodule {
   id: string;
   title: string;
-  description: string;
+  key_concept: string | null;
   order_index: number;
 }
 
@@ -229,9 +231,40 @@ const ModuleReader = () => {
               <h1 className="text-3xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
                 {module.title}
               </h1>
-              {module.description && (
-                <p className="text-muted-foreground mb-6">{module.description}</p>
+              
+              {/* Key Concept */}
+              {module.key_concept && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                    Key Concept
+                  </h3>
+                  <p className="text-foreground">{module.key_concept}</p>
+                </div>
               )}
+
+              {/* Year Tested */}
+              {(module.prelim_year_tested || module.a_level_year_tested) && (
+                <div className="mb-6 p-4 rounded-lg bg-accent/30 border border-border">
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+                    Year Tested
+                  </h3>
+                  <div className="space-y-2">
+                    {module.prelim_year_tested && (
+                      <div>
+                        <span className="font-medium text-foreground">Prelim: </span>
+                        <span className="text-foreground">{module.prelim_year_tested}</span>
+                      </div>
+                    )}
+                    {module.a_level_year_tested && (
+                      <div>
+                        <span className="font-medium text-foreground">A Level: </span>
+                        <span className="text-foreground">{module.a_level_year_tested}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               <Separator className="my-6" />
               {module.content ? (
                 <div>
@@ -264,8 +297,8 @@ const ModuleReader = () => {
                     <AccordionItem key={submodule.id} value={submodule.id}>
                       <AccordionTrigger>{submodule.title}</AccordionTrigger>
                       <AccordionContent>
-                        {submodule.description && (
-                          <p className="text-muted-foreground">{submodule.description}</p>
+                        {submodule.key_concept && (
+                          <p className="text-muted-foreground">{submodule.key_concept}</p>
                         )}
                         <Button
                           variant="link"
