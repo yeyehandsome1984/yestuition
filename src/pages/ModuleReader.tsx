@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Download, FileText } from "lucide-react";
+import { ArrowLeft, Download, FileText, Maximize2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
   Breadcrumb,
@@ -60,6 +61,7 @@ const ModuleReader = () => {
   const [submodules, setSubmodules] = useState<Submodule[]>([]);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [contentFullscreen, setContentFullscreen] = useState(false);
 
   useEffect(() => {
     if (moduleId) {
@@ -173,8 +175,20 @@ const ModuleReader = () => {
               )}
               <Separator className="my-6" />
               {module.content ? (
-                <div className="prose prose-slate max-w-none dark:prose-invert">
-                  <div dangerouslySetInnerHTML={{ __html: module.content }} />
+                <div>
+                  <div className="flex justify-end mb-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setContentFullscreen(true)}
+                    >
+                      <Maximize2 className="h-4 w-4 mr-2" />
+                      View Fullscreen
+                    </Button>
+                  </div>
+                  <div className="prose prose-slate max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground">
+                    <div dangerouslySetInnerHTML={{ __html: module.content }} />
+                  </div>
                 </div>
               ) : (
                 <p className="text-muted-foreground">No content available yet.</p>
@@ -240,6 +254,17 @@ const ModuleReader = () => {
           )}
         </div>
       </main>
+
+      <Dialog open={contentFullscreen} onOpenChange={setContentFullscreen}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">{module.title}</DialogTitle>
+          </DialogHeader>
+          <div className="prose prose-slate max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground py-4">
+            <div dangerouslySetInnerHTML={{ __html: module.content }} />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
