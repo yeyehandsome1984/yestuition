@@ -17,6 +17,7 @@ export type Database = {
       attachments: {
         Row: {
           created_at: string | null
+          deleted_at: string | null
           file_name: string
           file_path: string
           file_size: number | null
@@ -28,6 +29,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          deleted_at?: string | null
           file_name: string
           file_path: string
           file_size?: number | null
@@ -39,6 +41,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          deleted_at?: string | null
           file_name?: string
           file_path?: string
           file_size?: number | null
@@ -107,6 +110,7 @@ export type Database = {
           content: string | null
           created_at: string | null
           created_by: string | null
+          deleted_at: string | null
           description: string | null
           id: string
           order_index: number | null
@@ -119,6 +123,7 @@ export type Database = {
           content?: string | null
           created_at?: string | null
           created_by?: string | null
+          deleted_at?: string | null
           description?: string | null
           id?: string
           order_index?: number | null
@@ -131,6 +136,7 @@ export type Database = {
           content?: string | null
           created_at?: string | null
           created_by?: string | null
+          deleted_at?: string | null
           description?: string | null
           id?: string
           order_index?: number | null
@@ -188,6 +194,7 @@ export type Database = {
           code: string
           created_at: string | null
           created_by: string | null
+          deleted_at: string | null
           description: string | null
           icon: string | null
           id: string
@@ -198,6 +205,7 @@ export type Database = {
           code: string
           created_at?: string | null
           created_by?: string | null
+          deleted_at?: string | null
           description?: string | null
           icon?: string | null
           id?: string
@@ -208,6 +216,7 @@ export type Database = {
           code?: string
           created_at?: string | null
           created_by?: string | null
+          deleted_at?: string | null
           description?: string | null
           icon?: string | null
           id?: string

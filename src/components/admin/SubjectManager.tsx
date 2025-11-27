@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -21,6 +22,8 @@ const SubjectManager = () => {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [subjectToDelete, setSubjectToDelete] = useState<string | null>(null);
   const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
   const [formData, setFormData] = useState({ code: "", title: "", description: "", icon: "" });
 
@@ -32,6 +35,7 @@ const SubjectManager = () => {
     const { data, error } = await supabase
       .from("subjects")
       .select("*")
+      .is("deleted_at", null)
       .order("code");
 
     if (error) {
@@ -96,15 +100,18 @@ const SubjectManager = () => {
     setDialogOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this subject? All associated modules will also be deleted.")) {
-      return;
-    }
+  const handleDeleteClick = (id: string) => {
+    setSubjectToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!subjectToDelete) return;
 
     const { error } = await supabase
       .from("subjects")
-      .delete()
-      .eq("id", id);
+      .update({ deleted_at: new Date().toISOString() })
+      .eq("id", subjectToDelete);
 
     if (error) {
       toast.error("Failed to delete subject");
@@ -112,6 +119,8 @@ const SubjectManager = () => {
     }
 
     toast.success("Subject deleted successfully");
+    setDeleteDialogOpen(false);
+    setSubjectToDelete(null);
     fetchSubjects();
   };
 
@@ -236,7 +245,7 @@ const SubjectManager = () => {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleDelete(subject.id)}
+                        onClick={() => handleDeleteClick(subject.id)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -248,6 +257,24 @@ const SubjectManager = () => {
           </TableBody>
         </Table>
       </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will archive the subject and all associated modules. The data will be preserved but hidden from view. 
+              Click "Confirm Delete" again to proceed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setSubjectToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Confirm Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

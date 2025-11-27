@@ -1,5 +1,6 @@
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import Underline from "@tiptap/extension-underline";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { Color } from "@tiptap/extension-color";
 import { Highlight } from "@tiptap/extension-highlight";
@@ -9,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Bold,
   Italic,
+  Underline as UnderlineIcon,
   Strikethrough,
   Code,
   Heading1,
@@ -36,6 +38,7 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
   const editor = useEditor({
     extensions: [
       StarterKit,
+      Underline,
       TextStyle,
       Color,
       Highlight.configure({ multicolor: true }),
@@ -48,6 +51,19 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
       onChange(editor.getHTML());
     },
   });
+
+  const fontSizes = ['12', '14', '16', '18', '20', '24', '28', '32', '36', '48'];
+  const fontFamilies = [
+    { label: 'Default', value: '' },
+    { label: 'Arial', value: 'Arial, sans-serif' },
+    { label: 'Times New Roman', value: '"Times New Roman", serif' },
+    { label: 'Georgia', value: 'Georgia, serif' },
+    { label: 'Verdana', value: 'Verdana, sans-serif' },
+    { label: 'Courier New', value: '"Courier New", monospace' },
+    { label: 'Comic Sans MS', value: '"Comic Sans MS", cursive' },
+    { label: 'Impact', value: 'Impact, fantasy' },
+    { label: 'Trebuchet MS', value: '"Trebuchet MS", sans-serif' },
+  ];
 
   if (!editor) {
     return null;
@@ -86,14 +102,6 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
     { name: "Orange", value: "#f97316" },
   ];
 
-  const fontSizes = [
-    { label: "Small", class: "text-sm" },
-    { label: "Normal", class: "text-base" },
-    { label: "Large", class: "text-lg" },
-    { label: "X-Large", class: "text-xl" },
-    { label: "2X-Large", class: "text-2xl" },
-  ];
-
   return (
     <div className="border rounded-md">
       <div className="border-b bg-muted/30 p-3 space-y-3">
@@ -107,21 +115,29 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
             <Bold className="h-4 w-4" />
           </ToolbarButton>
 
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          isActive={editor.isActive("italic")}
-          title="Italic"
-        >
-          <Italic className="h-4 w-4" />
-        </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            isActive={editor.isActive("italic")}
+            title="Italic"
+          >
+            <Italic className="h-4 w-4" />
+          </ToolbarButton>
 
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleStrike().run()}
-          isActive={editor.isActive("strike")}
-          title="Strikethrough"
-        >
-          <Strikethrough className="h-4 w-4" />
-        </ToolbarButton>
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleUnderline().run()}
+            isActive={editor.isActive("underline")}
+            title="Underline"
+          >
+            <UnderlineIcon className="h-4 w-4" />
+          </ToolbarButton>
+
+          <ToolbarButton
+            onClick={() => editor.chain().focus().toggleStrike().run()}
+            isActive={editor.isActive("strike")}
+            title="Strikethrough"
+          >
+            <Strikethrough className="h-4 w-4" />
+          </ToolbarButton>
 
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleCode().run()}
@@ -228,34 +244,47 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
           </ToolbarButton>
         </div>
 
-        {/* Second Row: Font Size and Color Controls */}
+        {/* Second Row: Font Size, Font Family and Color Controls */}
         <div className="flex flex-wrap gap-3 items-center pt-2 border-t">
           <div className="flex items-center gap-2">
-            <Label className="text-xs font-medium flex items-center gap-1">
-              <Type className="h-3 w-3" />
-              Size:
-            </Label>
-            <Select
-              value="normal"
-              onValueChange={(value) => {
-                const size = fontSizes.find(s => s.label.toLowerCase() === value);
+            <Label className="text-xs font-medium">Size:</Label>
+            <select
+              className="h-8 px-2 text-sm rounded-md border border-input bg-background"
+              onChange={(e) => {
+                const size = e.target.value;
                 if (size) {
-                  // Apply custom class for font size
-                  editor.chain().focus().run();
+                  editor.chain().focus().setMark('textStyle', { fontSize: `${size}px` }).run();
+                } else {
+                  editor.chain().focus().unsetMark('textStyle').run();
                 }
               }}
             >
-              <SelectTrigger className="h-8 w-32">
-                <SelectValue placeholder="Size" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="small">Small</SelectItem>
-                <SelectItem value="normal">Normal</SelectItem>
-                <SelectItem value="large">Large</SelectItem>
-                <SelectItem value="x-large">X-Large</SelectItem>
-                <SelectItem value="2x-large">2X-Large</SelectItem>
-              </SelectContent>
-            </Select>
+              <option value="">Default</option>
+              {fontSizes.map((size) => (
+                <option key={size} value={size}>{size}px</option>
+              ))}
+            </select>
+          </div>
+
+          <Separator orientation="vertical" className="h-8" />
+
+          <div className="flex items-center gap-2">
+            <Label className="text-xs font-medium">Font:</Label>
+            <select
+              className="h-8 px-2 text-sm rounded-md border border-input bg-background"
+              onChange={(e) => {
+                const fontFamily = e.target.value;
+                if (fontFamily) {
+                  editor.chain().focus().setMark('textStyle', { fontFamily }).run();
+                } else {
+                  editor.chain().focus().unsetMark('textStyle').run();
+                }
+              }}
+            >
+              {fontFamilies.map((font) => (
+                <option key={font.value} value={font.value}>{font.label}</option>
+              ))}
+            </select>
           </div>
 
           <Separator orientation="vertical" className="h-8" />

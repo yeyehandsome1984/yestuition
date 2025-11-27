@@ -8,6 +8,7 @@ import { Maximize2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Pencil, Trash2, FileText } from "lucide-react";
 import { toast } from "sonner";
@@ -35,6 +36,8 @@ const ModuleManager = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [contentDialogOpen, setContentDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [moduleToDelete, setModuleToDelete] = useState<string | null>(null);
   const [editingModule, setEditingModule] = useState<Module | null>(null);
   const [formData, setFormData] = useState({
     subject_id: "",
@@ -52,8 +55,8 @@ const ModuleManager = () => {
   const fetchData = async () => {
     try {
       const [subjectsRes, modulesRes] = await Promise.all([
-        supabase.from("subjects").select("id, code, title").order("code"),
-        supabase.from("modules").select("*").order("order_index"),
+        supabase.from("subjects").select("id, code, title").is("deleted_at", null).order("code"),
+        supabase.from("modules").select("*").is("deleted_at", null).order("order_index"),
       ]);
 
       if (subjectsRes.error) throw subjectsRes.error;
@@ -132,15 +135,18 @@ const ModuleManager = () => {
     setDialogOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this module? All submodules will also be deleted.")) {
-      return;
-    }
+  const handleDeleteClick = (id: string) => {
+    setModuleToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!moduleToDelete) return;
 
     const { error } = await supabase
       .from("modules")
-      .delete()
-      .eq("id", id);
+      .update({ deleted_at: new Date().toISOString() })
+      .eq("id", moduleToDelete);
 
     if (error) {
       toast.error("Failed to delete module");
@@ -148,6 +154,8 @@ const ModuleManager = () => {
     }
 
     toast.success("Module deleted successfully");
+    setDeleteDialogOpen(false);
+    setModuleToDelete(null);
     fetchData();
   };
 
@@ -381,7 +389,7 @@ const ModuleManager = () => {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleDelete(module.id)}
+                        onClick={() => handleDeleteClick(module.id)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -393,6 +401,24 @@ const ModuleManager = () => {
           </TableBody>
         </Table>
       </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will archive the module and all submodules. The data will be preserved but hidden from view. 
+              Click "Confirm Delete" again to proceed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setModuleToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Confirm Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

@@ -1,30 +1,76 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { BookOpen, FileText, Users, Download, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import Navigation from "@/components/Navigation";
 import SubjectCard from "@/components/SubjectCard";
 import FeatureCard from "@/components/FeatureCard";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+interface Subject {
+  id: string;
+  code: string;
+  title: string;
+  description: string | null;
+  icon: string | null;
+  moduleCount: number;
+}
 
 const Index = () => {
-  const subjects = [
-    {
-      id: "poa",
-      title: "Principles of Accounting",
-      code: "POA",
-      description: "Master the fundamentals of accounting with comprehensive modules covering the accounting equation, double-entry bookkeeping, and financial statements.",
-      moduleCount: 12,
-      icon: "📊"
-    },
-    {
-      id: "mob",
-      title: "Management of Business",
-      code: "MOB",
-      description: "Learn essential business management concepts including organizational structures, marketing strategies, and business operations.",
-      moduleCount: 10,
-      icon: "💼"
+  const navigate = useNavigate();
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    checkAuth();
+    fetchSubjects();
+  }, []);
+
+  const checkAuth = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      navigate('/auth');
     }
-  ];
+  };
+
+  const fetchSubjects = async () => {
+    try {
+      const { data: subjectsData, error: subjectsError } = await supabase
+        .from("subjects")
+        .select("*")
+        .is("deleted_at", null)
+        .order("code");
+
+      if (subjectsError) throw subjectsError;
+
+      const subjectsWithModules = await Promise.all(
+        (subjectsData || []).map(async (subject) => {
+          const { count } = await supabase
+            .from("modules")
+            .select("*", { count: "exact", head: true })
+            .eq("subject_id", subject.id)
+            .is("parent_id", null)
+            .is("deleted_at", null);
+
+          return {
+            ...subject,
+            moduleCount: count || 0,
+          };
+        })
+      );
+
+      setSubjects(subjectsWithModules);
+    } catch (error) {
+      console.error("Error fetching subjects:", error);
+      toast.error("Failed to load subjects");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const features = [
     {
@@ -63,24 +109,6 @@ const Index = () => {
             <p className="text-xl md:text-2xl text-primary-foreground/90 max-w-2xl mx-auto">
               Your comprehensive platform for Principles of Accounting and Management of Business
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
-              <Button 
-                size="lg" 
-                variant="secondary" 
-                className="min-w-[200px]"
-                onClick={() => window.location.href = '/subjects'}
-              >
-                Start Learning
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="min-w-[200px] bg-white/10 hover:bg-white/20 border-white/30 text-white hover:text-white"
-                onClick={() => window.location.href = '/subjects'}
-              >
-                View Subjects
-              </Button>
-            </div>
           </div>
         </div>
       </section>
@@ -110,11 +138,44 @@ const Index = () => {
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-6">
-            {subjects.map((subject) => (
-              <SubjectCard key={subject.id} {...subject} />
-            ))}
-          </div>
+          {loading ? (
+            <div className="grid md:grid-cols-2 gap-6">
+              {[1, 2].map((i) => (
+                <div key={i} className="space-y-4">
+                  <Skeleton className="h-48 w-full" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-6">
+              {subjects.map((subject) => (
+                <div
+                  key={subject.id}
+                  onClick={() => navigate(`/subjects/${subject.id}/modules`)}
+                  className="cursor-pointer"
+                >
+                  <SubjectCard {...subject} />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {!loading && subjects.length > 0 && (
+            <div className="grid md:grid-cols-2 gap-6 mt-6">
+              {subjects.map((subject) => (
+                <div key={`downloads-${subject.id}`} className="flex justify-center">
+                  <Button
+                    variant="outline"
+                    className="w-full max-w-md"
+                    onClick={() => navigate(`/subjects/${subject.id}/downloads`)}
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    View {subject.code} Downloads & Attachments
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
