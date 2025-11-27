@@ -64,10 +64,20 @@ const Index = () => {
               Your comprehensive platform for Principles of Accounting and Management of Business
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
-              <Button size="lg" variant="secondary" className="min-w-[200px]">
+              <Button 
+                size="lg" 
+                variant="secondary" 
+                className="min-w-[200px]"
+                onClick={() => window.location.href = '/subjects'}
+              >
                 Start Learning
               </Button>
-              <Button size="lg" variant="outline" className="min-w-[200px] bg-white/10 hover:bg-white/20 border-white/30 text-white hover:text-white">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="min-w-[200px] bg-white/10 hover:bg-white/20 border-white/30 text-white hover:text-white"
+                onClick={() => window.location.href = '/subjects'}
+              >
                 View Subjects
               </Button>
             </div>

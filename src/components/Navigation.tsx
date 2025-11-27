@@ -1,16 +1,37 @@
 import { Button } from "@/components/ui/button";
-import { BookOpen, Menu, User } from "lucide-react";
-import { useState } from "react";
+import { BookOpen, Menu, User, LogOut } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const Navigation = () => {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    toast.success("Signed out successfully");
+    navigate("/");
+  };
 
   const navLinks = [
     { label: "Home", href: "/" },
-    { label: "Subjects", href: "#subjects" },
-    { label: "About", href: "#about" },
-    { label: "Contact", href: "#contact" },
+    { label: "Subjects", href: "/subjects" },
   ];
 
   return (
@@ -29,7 +50,13 @@ const Navigation = () => {
               <a
                 key={link.label}
                 href={link.href}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                onClick={(e) => {
+                  if (link.href.startsWith('/')) {
+                    e.preventDefault();
+                    navigate(link.href);
+                  }
+                }}
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
               >
                 {link.label}
               </a>
@@ -38,12 +65,24 @@ const Navigation = () => {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-3">
-            <Button variant="ghost" size="sm">
-              Sign In
-            </Button>
-            <Button size="sm" className="bg-accent hover:bg-accent/90">
-              Subscribe
-            </Button>
+            {user ? (
+              <>
+                <span className="text-sm text-muted-foreground">{user.email}</span>
+                <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" onClick={() => navigate("/auth")}>
+                  Sign In
+                </Button>
+                <Button size="sm" className="bg-accent hover:bg-accent/90" onClick={() => navigate("/auth")}>
+                  Get Started
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu */}
@@ -59,20 +98,38 @@ const Navigation = () => {
                   <a
                     key={link.label}
                     href={link.href}
-                    className="text-base font-medium text-foreground hover:text-primary transition-colors py-2"
-                    onClick={() => setIsOpen(false)}
+                    onClick={(e) => {
+                      if (link.href.startsWith('/')) {
+                        e.preventDefault();
+                        navigate(link.href);
+                        setIsOpen(false);
+                      }
+                    }}
+                    className="text-base font-medium text-foreground hover:text-primary transition-colors py-2 cursor-pointer"
                   >
                     {link.label}
                   </a>
                 ))}
                 <div className="pt-4 border-t flex flex-col gap-3">
-                  <Button variant="outline" className="w-full justify-start">
-                    <User className="mr-2 h-4 w-4" />
-                    Sign In
-                  </Button>
-                  <Button className="w-full bg-accent hover:bg-accent/90">
-                    Subscribe Now
-                  </Button>
+                  {user ? (
+                    <>
+                      <div className="text-sm text-muted-foreground px-2">{user.email}</div>
+                      <Button variant="outline" className="w-full justify-start" onClick={handleSignOut}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Sign Out
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button variant="outline" className="w-full justify-start" onClick={() => { navigate("/auth"); setIsOpen(false); }}>
+                        <User className="mr-2 h-4 w-4" />
+                        Sign In
+                      </Button>
+                      <Button className="w-full bg-accent hover:bg-accent/90" onClick={() => { navigate("/auth"); setIsOpen(false); }}>
+                        Get Started
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </SheetContent>
