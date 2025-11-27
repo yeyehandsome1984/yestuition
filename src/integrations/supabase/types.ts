@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      attachment_modules: {
+        Row: {
+          attachment_id: string
+          created_at: string | null
+          id: string
+          module_id: string
+        }
+        Insert: {
+          attachment_id: string
+          created_at?: string | null
+          id?: string
+          module_id: string
+        }
+        Update: {
+          attachment_id?: string
+          created_at?: string | null
+          id?: string
+          module_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attachment_modules_attachment_id_fkey"
+            columns: ["attachment_id"]
+            isOneToOne: false
+            referencedRelation: "attachments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attachment_modules_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attachments: {
         Row: {
           category: string

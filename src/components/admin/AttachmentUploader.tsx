@@ -25,7 +25,7 @@ const AttachmentUploader = () => {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [modules, setModules] = useState<Module[]>([]);
   const [selectedSubject, setSelectedSubject] = useState("");
-  const [selectedModule, setSelectedModule] = useState("");
+  const [selectedModuleIds, setSelectedModuleIds] = useState<string[]>([]);
   const [category, setCategory] = useState("Prelim & A level");
   const [title, setTitle] = useState("");
   const [files, setFiles] = useState<File[]>([]);
@@ -40,7 +40,7 @@ const AttachmentUploader = () => {
       fetchModules(selectedSubject);
     } else {
       setModules([]);
-      setSelectedModule("");
+      setSelectedModuleIds([]);
     }
   }, [selectedSubject]);
 
@@ -101,23 +101,71 @@ const AttachmentUploader = () => {
     setUploading(true);
 
     try {
-      // For now, we'll store placeholder file paths since storage bucket isn't set up yet
-      // In production, you would upload to Supabase Storage first
-      const attachments = files.map((file) => ({
-        module_id: selectedModule || null,
+      // Upload files to Supabase Storage
+      const uploadedFiles = await Promise.all(
+        files.map(async (file) => {
+          const fileExt = file.name.split(".").pop();
+          const fileName = `${Math.random()}.${fileExt}`;
+          const filePath = `${fileName}`;
+
+          const { error: uploadError, data } = await supabase.storage
+            .from("attachments")
+            .upload(filePath, file);
+
+          if (uploadError) {
+            throw uploadError;
+          }
+
+          const { data: { publicUrl } } = supabase.storage
+            .from("attachments")
+            .getPublicUrl(filePath);
+
+          return {
+            file_path: publicUrl,
+            file_name: file.name,
+            file_type: file.type,
+            file_size: file.size,
+          };
+        })
+      );
+
+      // Insert attachment records
+      const attachments = uploadedFiles.map((uploadedFile) => ({
         category: category,
-        title: title.trim() || file.name,
-        file_name: file.name,
-        file_path: `placeholder/${Date.now()}_${file.name}`,
-        file_type: file.type,
-        file_size: file.size
+        title: title.trim() || uploadedFile.file_name,
+        file_name: uploadedFile.file_name,
+        file_path: uploadedFile.file_path,
+        file_type: uploadedFile.file_type,
+        file_size: uploadedFile.file_size,
       }));
 
-      const { error } = await supabase.from("attachments").insert(attachments);
+      const { data: insertedAttachments, error: insertError } = await supabase
+        .from("attachments")
+        .insert(attachments)
+        .select();
 
-      if (error) {
-        toast.error("Failed to upload attachments");
+      if (insertError) {
+        toast.error("Failed to save attachment records");
         return;
+      }
+
+      // Link attachments to selected modules
+      if (selectedModuleIds.length > 0 && insertedAttachments) {
+        const links = insertedAttachments.flatMap((attachment) =>
+          selectedModuleIds.map((moduleId) => ({
+            attachment_id: attachment.id,
+            module_id: moduleId,
+          }))
+        );
+
+        const { error: linkError } = await supabase
+          .from("attachment_modules")
+          .insert(links);
+
+        if (linkError) {
+          toast.error("Failed to link attachments to modules");
+          return;
+        }
       }
 
       toast.success(`${files.length} attachment(s) uploaded successfully`);
@@ -126,7 +174,7 @@ const AttachmentUploader = () => {
       setTitle("");
       setFiles([]);
       setCategory("Prelim & A level");
-      setSelectedModule("");
+      setSelectedModuleIds([]);
       setSelectedSubject("");
       
       // Reset file input
@@ -142,14 +190,16 @@ const AttachmentUploader = () => {
 
   const filteredModules = modules.filter(m => m.subject_id === selectedSubject);
 
+  const handleModuleToggle = (moduleId: string) => {
+    setSelectedModuleIds(prev =>
+      prev.includes(moduleId)
+        ? prev.filter(id => id !== moduleId)
+        : [...prev, moduleId]
+    );
+  };
+
   return (
     <div className="space-y-6">
-      <Alert>
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          Note: File storage bucket needs to be configured for actual file uploads. Currently storing metadata only.
-        </AlertDescription>
-      </Alert>
 
       <Card>
         <CardHeader>
@@ -187,29 +237,32 @@ const AttachmentUploader = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="module">Module (Optional)</Label>
-              <Select
-                value={selectedModule}
-                onValueChange={setSelectedModule}
-                disabled={!selectedSubject}
-              >
-                <SelectTrigger id="module">
-                  <SelectValue placeholder="Select a module (optional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  {filteredModules.length === 0 ? (
-                    <SelectItem value="__no_modules" disabled>
-                      No modules found for this subject
-                    </SelectItem>
-                  ) : (
-                    filteredModules.map((module) => (
-                      <SelectItem key={module.id} value={module.id}>
+              <Label htmlFor="modules">Modules (Optional - Multi-select)</Label>
+              {!selectedSubject ? (
+                <p className="text-sm text-muted-foreground">Select a subject first to choose modules</p>
+              ) : filteredModules.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No modules found for this subject</p>
+              ) : (
+                <div className="border rounded-lg p-4 max-h-48 overflow-y-auto space-y-2">
+                  {filteredModules.map((module) => (
+                    <div key={module.id} className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id={`module-${module.id}`}
+                        checked={selectedModuleIds.includes(module.id)}
+                        onChange={() => handleModuleToggle(module.id)}
+                        className="rounded"
+                      />
+                      <label
+                        htmlFor={`module-${module.id}`}
+                        className="text-sm cursor-pointer"
+                      >
                         {module.title}
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">

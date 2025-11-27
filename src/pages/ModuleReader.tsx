@@ -108,10 +108,25 @@ const ModuleReader = () => {
           .select("*")
           .eq("parent_id", moduleId)
           .order("order_index"),
-        supabase
-          .from("attachments")
-          .select("*")
-          .eq("module_id", moduleId),
+        (async () => {
+          // Get attachments through junction table
+          const { data: links } = await supabase
+            .from("attachment_modules")
+            .select("attachment_id")
+            .eq("module_id", moduleId);
+
+          const attachmentIds = links?.map(link => link.attachment_id) || [];
+          
+          if (attachmentIds.length === 0) return { data: [] };
+
+          const { data } = await supabase
+            .from("attachments")
+            .select("*")
+            .in("id", attachmentIds)
+            .is("deleted_at", null);
+
+          return { data };
+        })(),
         supabase
           .from("module_questions")
           .select("*")
@@ -165,8 +180,9 @@ const ModuleReader = () => {
   };
 
   const handleDownloadAttachment = (attachment: Attachment) => {
-    // This would be replaced with actual Supabase storage download
-    toast.info(`Download functionality coming soon: ${attachment.file_name}`);
+    // Open file in new tab for download
+    window.open(attachment.file_path, '_blank');
+    toast.success("Download started");
   };
 
   if (loading) {

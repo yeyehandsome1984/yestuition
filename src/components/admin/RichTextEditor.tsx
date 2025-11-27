@@ -5,6 +5,13 @@ import { TextStyle } from "@tiptap/extension-text-style";
 import { Color } from "@tiptap/extension-color";
 import { Highlight } from "@tiptap/extension-highlight";
 import { TextAlign } from "@tiptap/extension-text-align";
+import { Table } from "@tiptap/extension-table";
+import { TableRow } from "@tiptap/extension-table-row";
+import { TableCell } from "@tiptap/extension-table-cell";
+import { TableHeader } from "@tiptap/extension-table-header";
+import { Image } from "@tiptap/extension-image";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
@@ -25,6 +32,8 @@ import {
   AlignRight,
   Highlighter,
   Type,
+  Table as TableIcon,
+  ImagePlus,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
@@ -45,12 +54,53 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
       TextAlign.configure({
         types: ["heading", "paragraph"],
       }),
+      Table.configure({
+        resizable: true,
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
+      Image.configure({
+        inline: true,
+        allowBase64: false,
+      }),
     ],
     content,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
   });
+
+  const handleImageUpload = async () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("content-images")
+        .upload(filePath, file);
+
+      if (uploadError) {
+        toast.error("Failed to upload image");
+        return;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("content-images")
+        .getPublicUrl(filePath);
+
+      editor?.chain().focus().setImage({ src: publicUrl }).run();
+      toast.success("Image uploaded successfully");
+    };
+    input.click();
+  };
 
   const fontSizes = ['12', '14', '16', '18', '20', '24', '28', '32', '36', '48'];
   const fontFamilies = [
@@ -242,6 +292,28 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
           >
             <Redo className="h-4 w-4" />
           </ToolbarButton>
+
+          <Separator orientation="vertical" className="h-8" />
+
+          <ToolbarButton
+            onClick={() =>
+              editor
+                .chain()
+                .focus()
+                .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+                .run()
+            }
+            title="Insert Table"
+          >
+            <TableIcon className="h-4 w-4" />
+          </ToolbarButton>
+
+          <ToolbarButton
+            onClick={handleImageUpload}
+            title="Insert Image"
+          >
+            <ImagePlus className="h-4 w-4" />
+          </ToolbarButton>
         </div>
 
         {/* Second Row: Font Size, Font Family and Color Controls */}
@@ -316,7 +388,7 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
 
       <EditorContent
         editor={editor}
-        className="prose prose-sm max-w-none p-4 min-h-[300px] focus:outline-none"
+        className="prose prose-sm max-w-none p-4 min-h-[300px] focus:outline-none [&_table]:border-collapse [&_table]:w-full [&_td]:border [&_td]:border-border [&_td]:p-2 [&_th]:border [&_th]:border-border [&_th]:p-2 [&_th]:bg-muted [&_th]:font-semibold [&_img]:max-w-full [&_img]:h-auto"
       />
     </div>
   );
