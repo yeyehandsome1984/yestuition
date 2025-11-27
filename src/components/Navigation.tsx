@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import SearchInput from "@/components/SearchInput";
 
 const Navigation = () => {
   const navigate = useNavigate();
@@ -83,6 +84,7 @@ const Navigation = () => {
                 {link.label}
               </a>
             ))}
+            <SearchInput placeholder="Search all modules..." className="w-64" />
           </div>
 
           {/* Desktop Actions */}
@@ -116,6 +118,7 @@ const Navigation = () => {
             </SheetTrigger>
             <SheetContent side="right" className="w-[280px]">
               <div className="flex flex-col gap-4 mt-8">
+                <SearchInput placeholder="Search modules..." className="w-full mb-2" />
                 {navLinks.map((link) => (
                   <a
                     key={link.label}
