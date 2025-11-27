@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronRight, BookOpen, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import SearchInput from "@/components/SearchInput";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -122,9 +123,16 @@ const Modules = () => {
             </BreadcrumbList>
           </Breadcrumb>
 
-          <h1 className="text-2xl font-bold mb-6">
-            {subject.code} - {subject.title}
-          </h1>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+            <h1 className="text-2xl font-bold">
+              {subject.code} - {subject.title}
+            </h1>
+            <SearchInput 
+              subjectId={subjectId} 
+              placeholder={`Search in ${subject.code}...`}
+              className="w-full md:w-80"
+            />
+          </div>
 
           {modules.length === 0 ? (
             <Card>
