@@ -122,15 +122,9 @@ const Modules = () => {
             </BreadcrumbList>
           </Breadcrumb>
 
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-2">
-              <span className="text-5xl">{subject.icon}</span>
-              <h1 className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                {subject.title}
-              </h1>
-            </div>
-            <p className="text-muted-foreground">{subject.code}</p>
-          </div>
+          <h1 className="text-2xl font-bold mb-6">
+            {subject.code} - {subject.title}
+          </h1>
 
           {modules.length === 0 ? (
             <Card>
@@ -142,7 +136,7 @@ const Modules = () => {
               </CardContent>
             </Card>
           ) : (
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {modules.map((module, index) => (
                 <Card
                   key={module.id}
