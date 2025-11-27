@@ -161,13 +161,14 @@ const ModuleManager = () => {
   };
 
   const handleDialogChange = (open: boolean) => {
+    console.log("ModuleManager dialog change", { open, formData, editingModule });
     setDialogOpen(open);
     if (!open) {
       resetForm();
     }
   };
-
-  const parentModules = modules.filter(m => !m.parent_id);
+  
+  const parentModules = Array.isArray(modules) ? modules.filter((m) => !m.parent_id) : [];
 
   if (loading) {
     return <div className="text-center py-8">Loading modules...</div>;
