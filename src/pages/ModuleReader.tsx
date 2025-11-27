@@ -243,8 +243,8 @@ const ModuleReader = () => {
           </Breadcrumb>
 
           <Card className="mb-6">
-            <CardContent className="p-8">
-              <h1 className="text-3xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
+            <CardContent className="p-4">
+              <h1 className="text-3xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
                 {module.title}
               </h1>
               
