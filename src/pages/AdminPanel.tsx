@@ -3,10 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, FileText, Paperclip } from "lucide-react";
+import { BookOpen, FileText, Paperclip, MessageCircle } from "lucide-react";
 import SubjectManager from "@/components/admin/SubjectManager";
 import ModuleManager from "@/components/admin/ModuleManager";
 import AttachmentUploader from "@/components/admin/AttachmentUploader";
+import QuestionManager from "@/components/admin/QuestionManager";
 import { toast } from "sonner";
 
 const AdminPanel = () => {
@@ -65,7 +66,7 @@ const AdminPanel = () => {
         </div>
 
         <Tabs defaultValue="subjects" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 max-w-2xl">
+          <TabsList className="grid w-full grid-cols-4 max-w-3xl">
             <TabsTrigger value="subjects" className="flex items-center gap-2">
               <BookOpen className="h-4 w-4" />
               Subjects
@@ -77,6 +78,10 @@ const AdminPanel = () => {
             <TabsTrigger value="attachments" className="flex items-center gap-2">
               <Paperclip className="h-4 w-4" />
               Attachments
+            </TabsTrigger>
+            <TabsTrigger value="questions" className="flex items-center gap-2">
+              <MessageCircle className="h-4 w-4" />
+              Q&A
             </TabsTrigger>
           </TabsList>
 
@@ -114,6 +119,10 @@ const AdminPanel = () => {
                 <AttachmentUploader />
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="questions">
+            <QuestionManager />
           </TabsContent>
         </Tabs>
       </div>

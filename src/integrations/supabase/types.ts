@@ -22,7 +22,7 @@ export type Database = {
           file_size: number | null
           file_type: string | null
           id: string
-          module_id: string
+          module_id: string | null
           title: string
           uploaded_by: string | null
         }
@@ -33,7 +33,7 @@ export type Database = {
           file_size?: number | null
           file_type?: string | null
           id?: string
-          module_id: string
+          module_id?: string | null
           title: string
           uploaded_by?: string | null
         }
@@ -44,13 +44,57 @@ export type Database = {
           file_size?: number | null
           file_type?: string | null
           id?: string
-          module_id?: string
+          module_id?: string | null
           title?: string
           uploaded_by?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "attachments_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      module_questions: {
+        Row: {
+          answer: string | null
+          answered_at: string | null
+          answered_by: string | null
+          created_at: string
+          id: string
+          module_id: string
+          question: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          answer?: string | null
+          answered_at?: string | null
+          answered_by?: string | null
+          created_at?: string
+          id?: string
+          module_id: string
+          question: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          answer?: string | null
+          answered_at?: string | null
+          answered_by?: string | null
+          created_at?: string
+          id?: string
+          module_id?: string
+          question?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_questions_module_id_fkey"
             columns: ["module_id"]
             isOneToOne: false
             referencedRelation: "modules"

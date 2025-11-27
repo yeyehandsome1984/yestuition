@@ -12,6 +12,7 @@ interface Subject {
   title: string;
   description: string;
   icon: string;
+  moduleCount?: number;
 }
 
 const Subjects = () => {
@@ -39,7 +40,20 @@ const Subjects = () => {
         .order("code");
 
       if (error) throw error;
-      setSubjects(data || []);
+      
+      // Fetch module counts for each subject
+      const subjectsWithCounts = await Promise.all(
+        (data || []).map(async (subject) => {
+          const { count } = await supabase
+            .from("modules")
+            .select("*", { count: "exact", head: true })
+            .eq("subject_id", subject.id);
+          
+          return { ...subject, moduleCount: count || 0 };
+        })
+      );
+      
+      setSubjects(subjectsWithCounts);
     } catch (error: any) {
       toast.error("Failed to load subjects");
       console.error(error);
@@ -79,7 +93,7 @@ const Subjects = () => {
                     title={subject.title}
                     code={subject.code}
                     description={subject.description || ""}
-                    moduleCount={0}
+                    moduleCount={subject.moduleCount || 0}
                     icon={subject.icon || "📚"}
                   />
                 </div>

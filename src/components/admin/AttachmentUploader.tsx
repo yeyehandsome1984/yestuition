@@ -87,21 +87,6 @@ const AttachmentUploader = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!selectedSubject) {
-      toast.error("Please select a subject");
-      return;
-    }
-
-    if (!selectedModule) {
-      toast.error("Please select a module");
-      return;
-    }
-
-    if (!title.trim()) {
-      toast.error("Please enter a title");
-      return;
-    }
-
     if (files.length === 0) {
       toast.error("Please select at least one file");
       return;
@@ -113,8 +98,8 @@ const AttachmentUploader = () => {
       // For now, we'll store placeholder file paths since storage bucket isn't set up yet
       // In production, you would upload to Supabase Storage first
       const attachments = files.map((file) => ({
-        module_id: selectedModule,
-        title: files.length === 1 ? title : `${title} - ${file.name}`,
+        module_id: selectedModule || null,
+        title: title.trim() || file.name,
         file_name: file.name,
         file_path: `placeholder/${Date.now()}_${file.name}`,
         file_type: file.type,
@@ -168,13 +153,13 @@ const AttachmentUploader = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="subject">Subject *</Label>
+              <Label htmlFor="subject">Subject (Optional)</Label>
               <Select
                 value={selectedSubject}
                 onValueChange={setSelectedSubject}
               >
                 <SelectTrigger id="subject">
-                  <SelectValue placeholder="Select a subject" />
+                  <SelectValue placeholder="Select a subject (optional)" />
                 </SelectTrigger>
                 <SelectContent>
                   {subjects.length === 0 ? (
@@ -193,14 +178,14 @@ const AttachmentUploader = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="module">Module *</Label>
+              <Label htmlFor="module">Module (Optional)</Label>
               <Select
                 value={selectedModule}
                 onValueChange={setSelectedModule}
                 disabled={!selectedSubject}
               >
                 <SelectTrigger id="module">
-                  <SelectValue placeholder="Select a module" />
+                  <SelectValue placeholder="Select a module (optional)" />
                 </SelectTrigger>
                 <SelectContent>
                   {filteredModules.length === 0 ? (
@@ -219,13 +204,12 @@ const AttachmentUploader = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="title">Title *</Label>
+              <Label htmlFor="title">Title (Optional - defaults to filename)</Label>
               <Input
                 id="title"
                 placeholder="e.g., Chapter 1 Notes"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                required
               />
             </div>
 
