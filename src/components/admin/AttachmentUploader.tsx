@@ -87,8 +87,23 @@ const AttachmentUploader = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (files.length === 0 || !selectedModule || !title) {
-      toast.error("Please fill in all required fields");
+    if (!selectedSubject) {
+      toast.error("Please select a subject");
+      return;
+    }
+
+    if (!selectedModule) {
+      toast.error("Please select a module");
+      return;
+    }
+
+    if (!title.trim()) {
+      toast.error("Please enter a title");
+      return;
+    }
+
+    if (files.length === 0) {
+      toast.error("Please select at least one file");
       return;
     }
 
@@ -157,17 +172,22 @@ const AttachmentUploader = () => {
               <Select
                 value={selectedSubject}
                 onValueChange={setSelectedSubject}
-                required
               >
                 <SelectTrigger id="subject">
                   <SelectValue placeholder="Select a subject" />
                 </SelectTrigger>
                 <SelectContent>
-                  {subjects.map((subject) => (
-                    <SelectItem key={subject.id} value={subject.id}>
-                      {subject.code} - {subject.title}
-                    </SelectItem>
-                  ))}
+                  {subjects.length === 0 ? (
+                    <div className="p-2 text-sm text-muted-foreground">
+                      No subjects found. Create a subject first.
+                    </div>
+                  ) : (
+                    subjects.map((subject) => (
+                      <SelectItem key={subject.id} value={subject.id}>
+                        {subject.code} - {subject.title}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -178,7 +198,6 @@ const AttachmentUploader = () => {
                 value={selectedModule}
                 onValueChange={setSelectedModule}
                 disabled={!selectedSubject}
-                required
               >
                 <SelectTrigger id="module">
                   <SelectValue placeholder="Select a module" />

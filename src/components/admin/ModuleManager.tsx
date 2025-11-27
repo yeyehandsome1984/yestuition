@@ -70,6 +70,16 @@ const ModuleManager = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!formData.subject_id) {
+      toast.error("Please select a subject");
+      return;
+    }
+
+    if (!formData.title.trim()) {
+      toast.error("Please enter a title");
+      return;
+    }
+
     const moduleData = {
       subject_id: formData.subject_id,
       parent_id: formData.parent_id || null,
@@ -187,17 +197,22 @@ const ModuleManager = () => {
                 <Select
                   value={formData.subject_id}
                   onValueChange={(value) => setFormData({ ...formData, subject_id: value })}
-                  required
                 >
                   <SelectTrigger id="subject">
                     <SelectValue placeholder="Select a subject" />
                   </SelectTrigger>
                   <SelectContent>
-                    {subjects.map((subject) => (
-                      <SelectItem key={subject.id} value={subject.id}>
-                        {subject.code} - {subject.title}
-                      </SelectItem>
-                    ))}
+                    {subjects.length === 0 ? (
+                      <div className="p-2 text-sm text-muted-foreground">
+                        No subjects found. Create a subject first.
+                      </div>
+                    ) : (
+                      subjects.map((subject) => (
+                        <SelectItem key={subject.id} value={subject.id}>
+                          {subject.code} - {subject.title}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>
