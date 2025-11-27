@@ -57,8 +57,8 @@ const Index = () => {
       <section className="relative bg-gradient-hero text-primary-foreground py-20 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center space-y-6">
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
-              Ye （叶）S （帅）Tuition
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight flex justify-center items-center gap-1">
+              <span>Ye（叶）S（帅）Tuition</span>
             </h1>
             <p className="text-xl md:text-2xl text-primary-foreground/90 max-w-2xl mx-auto">
               Your comprehensive platform for Principles of Accounting and Management of Business
