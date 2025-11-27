@@ -115,10 +115,12 @@ const SubjectManager = () => {
     fetchSubjects();
   };
 
-  const handleDialogClose = () => {
-    setDialogOpen(false);
-    setEditingSubject(null);
-    setFormData({ code: "", title: "", description: "", icon: "" });
+  const handleDialogChange = (open: boolean) => {
+    setDialogOpen(open);
+    if (!open) {
+      setEditingSubject(null);
+      setFormData({ code: "", title: "", description: "", icon: "" });
+    }
   };
 
   if (loading) {
@@ -127,7 +129,7 @@ const SubjectManager = () => {
 
   return (
     <div className="space-y-4">
-      <Dialog open={dialogOpen} onOpenChange={handleDialogClose}>
+      <Dialog open={dialogOpen} onOpenChange={handleDialogChange}>
         <DialogTrigger asChild>
           <Button className="w-full sm:w-auto">
             <Plus className="mr-2 h-4 w-4" />
@@ -185,7 +187,7 @@ const SubjectManager = () => {
               </div>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={handleDialogClose}>
+              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancel
               </Button>
               <Button type="submit">
