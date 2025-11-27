@@ -47,24 +47,23 @@ const ModuleManager = () => {
   }, []);
 
   const fetchData = async () => {
-    const [subjectsRes, modulesRes] = await Promise.all([
-      supabase.from("subjects").select("id, code, title").order("code"),
-      supabase.from("modules").select("*, subjects(code, title)").order("order_index")
-    ]);
+    try {
+      const [subjectsRes, modulesRes] = await Promise.all([
+        supabase.from("subjects").select("id, code, title").order("code"),
+        supabase.from("modules").select("*").order("order_index"),
+      ]);
 
-    if (subjectsRes.error) {
-      toast.error("Failed to load subjects");
-      return;
+      if (subjectsRes.error) throw subjectsRes.error;
+      if (modulesRes.error) throw modulesRes.error;
+
+      setSubjects(subjectsRes.data || []);
+      setModules(modulesRes.data || []);
+    } catch (error) {
+      console.error("Failed to load subjects/modules", error);
+      toast.error("Failed to load subjects or modules");
+    } finally {
+      setLoading(false);
     }
-
-    if (modulesRes.error) {
-      toast.error("Failed to load modules");
-      return;
-    }
-
-    setSubjects(subjectsRes.data || []);
-    setModules(modulesRes.data || []);
-    setLoading(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -317,7 +316,7 @@ const ModuleManager = () => {
               modules.map((module) => (
                 <TableRow key={module.id}>
                   <TableCell className="font-medium">
-                    {module.subjects?.code}
+                    {subjects.find((s) => s.id === module.subject_id)?.code}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
