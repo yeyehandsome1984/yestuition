@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { BookOpen, Menu, User, LogOut } from "lucide-react";
+import { BookOpen, Menu, User, LogOut, Shield } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -10,14 +10,35 @@ const Navigation = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [isTeacherOrAdmin, setIsTeacherOrAdmin] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
-    });
+      
+      if (session?.user) {
+        const { data: roles } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", session.user.id);
+        
+        const hasAccess = roles?.some(r => r.role === "admin" || r.role === "teacher");
+        setIsTeacherOrAdmin(hasAccess || false);
+      } else {
+        setIsTeacherOrAdmin(false);
+      }
+    };
+
+    checkAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        checkAuth();
+      } else {
+        setIsTeacherOrAdmin(false);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -32,6 +53,7 @@ const Navigation = () => {
   const navLinks = [
     { label: "Home", href: "/" },
     { label: "Subjects", href: "/subjects" },
+    ...(isTeacherOrAdmin ? [{ label: "Admin", href: "/admin" }] : []),
   ];
 
   return (
