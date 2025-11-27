@@ -9,6 +9,7 @@ import Subjects from "./pages/Subjects";
 import Modules from "./pages/Modules";
 import ModuleReader from "./pages/ModuleReader";
 import AdminPanel from "./pages/AdminPanel";
+import Downloads from "./pages/Downloads";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/subjects" element={<Subjects />} />
           <Route path="/subjects/:subjectId/modules" element={<Modules />} />
+          <Route path="/subjects/:subjectId/downloads" element={<Downloads />} />
           <Route path="/modules/:moduleId" element={<ModuleReader />} />
           <Route path="/admin" element={<AdminPanel />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -4,7 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 import SubjectCard from "@/components/SubjectCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { Download } from "lucide-react";
 
 interface Subject {
   id: string;
@@ -84,18 +86,30 @@ const Subjects = () => {
               </>
             ) : (
               subjects.map((subject) => (
-                <div
-                  key={subject.id}
-                  onClick={() => navigate(`/subjects/${subject.id}/modules`)}
-                >
-                  <SubjectCard
-                    id={subject.id}
-                    title={subject.title}
-                    code={subject.code}
-                    description={subject.description || ""}
-                    moduleCount={subject.moduleCount || 0}
-                    icon={subject.icon || "📚"}
-                  />
+                <div key={subject.id} className="relative">
+                  <div onClick={() => navigate(`/subjects/${subject.id}/modules`)}>
+                    <SubjectCard
+                      id={subject.id}
+                      title={subject.title}
+                      code={subject.code}
+                      description={subject.description || ""}
+                      moduleCount={subject.moduleCount || 0}
+                      icon={subject.icon || "📚"}
+                    />
+                  </div>
+                  <div className="mt-2">
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/subjects/${subject.id}/downloads`);
+                      }}
+                    >
+                      <Download className="mr-2 h-4 w-4" />
+                      View Downloads & Attachments
+                    </Button>
+                  </div>
                 </div>
               ))
             )}
