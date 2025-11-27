@@ -204,9 +204,9 @@ const AttachmentUploader = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {filteredModules.length === 0 ? (
-                    <div className="p-2 text-sm text-muted-foreground">
+                    <SelectItem value="__no_modules" disabled>
                       No modules found for this subject
-                    </div>
+                    </SelectItem>
                   ) : (
                     filteredModules.map((module) => (
                       <SelectItem key={module.id} value={module.id}>
