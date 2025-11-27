@@ -243,14 +243,14 @@ const ModuleReader = () => {
           </Breadcrumb>
 
           <Card className="mb-6">
-            <CardContent className="p-4">
-              <h1 className="text-3xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
+            <CardContent className="px-4 pt-4 pb-4">
+              <h1 className="text-3xl font-bold mb-3 bg-gradient-primary bg-clip-text text-transparent">
                 {module.title}
               </h1>
               
               {/* Key Concept */}
               {module.key_concept && (
-                <div className="mb-6">
+                <div className="mb-4">
                   <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
                     Key Concept
                   </h3>
