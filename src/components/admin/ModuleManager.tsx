@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "./RichTextEditor";
+import { Maximize2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -32,6 +34,7 @@ const ModuleManager = () => {
   const [modules, setModules] = useState<Module[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [contentDialogOpen, setContentDialogOpen] = useState(false);
   const [editingModule, setEditingModule] = useState<Module | null>(null);
   const [formData, setFormData] = useState({
     subject_id: "",
@@ -262,13 +265,26 @@ const ModuleManager = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="content">Content</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="content">Content</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setContentDialogOpen(true)}
+                  >
+                    <Maximize2 className="h-4 w-4 mr-2" />
+                    Edit in Full Screen
+                  </Button>
+                </div>
                 <Textarea
                   id="content"
-                  placeholder="Module content (supports HTML)"
-                  value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  rows={6}
+                  placeholder="Click 'Edit in Full Screen' for rich text editing"
+                  value={formData.content.replace(/<[^>]*>/g, '')}
+                  rows={3}
+                  readOnly
+                  className="cursor-pointer"
+                  onClick={() => setContentDialogOpen(true)}
                 />
               </div>
 
@@ -292,6 +308,28 @@ const ModuleManager = () => {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={contentDialogOpen} onOpenChange={setContentDialogOpen}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Content</DialogTitle>
+            <DialogDescription>
+              Use the rich text editor to format your content
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <RichTextEditor
+              content={formData.content}
+              onChange={(content) => setFormData({ ...formData, content })}
+            />
+          </div>
+          <DialogFooter>
+            <Button type="button" onClick={() => setContentDialogOpen(false)}>
+              Done
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
