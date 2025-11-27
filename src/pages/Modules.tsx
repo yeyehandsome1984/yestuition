@@ -26,7 +26,7 @@ interface Subject {
 interface Module {
   id: string;
   title: string;
-  description: string;
+  key_concept: string | null;
   order_index: number;
 }
 
@@ -160,9 +160,9 @@ const Modules = () => {
                             {module.title}
                           </CardTitle>
                         </div>
-                        {module.description && (
+                        {module.key_concept && (
                           <CardDescription className="ml-11">
-                            {module.description}
+                            {module.key_concept}
                           </CardDescription>
                         )}
                       </div>

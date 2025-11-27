@@ -24,7 +24,9 @@ interface Module {
   subject_id: string;
   parent_id: string | null;
   title: string;
-  description: string | null;
+  key_concept: string | null;
+  prelim_year_tested: string | null;
+  a_level_year_tested: string | null;
   content: string | null;
   order_index: number | null;
   subjects?: { code: string; title: string };
@@ -43,7 +45,9 @@ const ModuleManager = () => {
     subject_id: "",
     parent_id: "__none", // internal sentinel for no parent
     title: "",
-    description: "",
+    key_concept: "",
+    prelim_year_tested: "",
+    a_level_year_tested: "",
     content: "",
     order_index: 0,
   });
@@ -89,7 +93,9 @@ const ModuleManager = () => {
       subject_id: formData.subject_id,
       parent_id: formData.parent_id === "__none" ? null : formData.parent_id,
       title: formData.title,
-      description: formData.description || null,
+      key_concept: formData.key_concept || null,
+      prelim_year_tested: formData.prelim_year_tested || null,
+      a_level_year_tested: formData.a_level_year_tested || null,
       content: formData.content || null,
       order_index: formData.order_index,
     };
@@ -128,7 +134,9 @@ const ModuleManager = () => {
       subject_id: module.subject_id,
       parent_id: module.parent_id ?? "__none",
       title: module.title,
-      description: module.description || "",
+      key_concept: module.key_concept || "",
+      prelim_year_tested: module.prelim_year_tested || "",
+      a_level_year_tested: module.a_level_year_tested || "",
       content: module.content || "",
       order_index: module.order_index || 0,
     });
@@ -165,7 +173,9 @@ const ModuleManager = () => {
       subject_id: "",
       parent_id: "__none",
       title: "",
-      description: "",
+      key_concept: "",
+      prelim_year_tested: "",
+      a_level_year_tested: "",
       content: "",
       order_index: 0,
     });
@@ -262,13 +272,33 @@ const ModuleManager = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="key_concept">Key concept</Label>
                 <Textarea
-                  id="description"
-                  placeholder="Brief description of the module"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  id="key_concept"
+                  placeholder="Brief description of key concepts in the module"
+                  value={formData.key_concept}
+                  onChange={(e) => setFormData({ ...formData, key_concept: e.target.value })}
                   rows={2}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="prelim_year_tested">Prelim Year Tested</Label>
+                <Input
+                  id="prelim_year_tested"
+                  placeholder="e.g., 2020, 2021, Paper 1"
+                  value={formData.prelim_year_tested}
+                  onChange={(e) => setFormData({ ...formData, prelim_year_tested: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="a_level_year_tested">A Level Year Tested</Label>
+                <Input
+                  id="a_level_year_tested"
+                  placeholder="e.g., 2022, 2023, Paper 2"
+                  value={formData.a_level_year_tested}
+                  onChange={(e) => setFormData({ ...formData, a_level_year_tested: e.target.value })}
                 />
               </div>
 

@@ -107,40 +107,46 @@ export type Database = {
       }
       modules: {
         Row: {
+          a_level_year_tested: string | null
           content: string | null
           created_at: string | null
           created_by: string | null
           deleted_at: string | null
-          description: string | null
           id: string
+          key_concept: string | null
           order_index: number | null
           parent_id: string | null
+          prelim_year_tested: string | null
           subject_id: string
           title: string
           updated_at: string | null
         }
         Insert: {
+          a_level_year_tested?: string | null
           content?: string | null
           created_at?: string | null
           created_by?: string | null
           deleted_at?: string | null
-          description?: string | null
           id?: string
+          key_concept?: string | null
           order_index?: number | null
           parent_id?: string | null
+          prelim_year_tested?: string | null
           subject_id: string
           title: string
           updated_at?: string | null
         }
         Update: {
+          a_level_year_tested?: string | null
           content?: string | null
           created_at?: string | null
           created_by?: string | null
           deleted_at?: string | null
-          description?: string | null
           id?: string
+          key_concept?: string | null
           order_index?: number | null
           parent_id?: string | null
+          prelim_year_tested?: string | null
           subject_id?: string
           title?: string
           updated_at?: string | null
