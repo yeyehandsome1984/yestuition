@@ -58,7 +58,7 @@ const Index = () => {
         <div className="container mx-auto max-w-6xl">
           <div className="text-center space-y-6">
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
-              叶 Tuition Hub
+              Ye （叶）S （帅）Tuition
             </h1>
             <p className="text-xl md:text-2xl text-primary-foreground/90 max-w-2xl mx-auto">
               Your comprehensive platform for Principles of Accounting and Management of Business
@@ -123,7 +123,7 @@ const Index = () => {
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Why Choose 叶 Tuition Hub?
+              Why Choose Ye （叶）S （帅）Tuition?
             </h2>
             <p className="text-lg text-muted-foreground">
               Everything you need for exam success in one place
@@ -163,7 +163,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="bg-muted py-8 px-4 border-t">
         <div className="container mx-auto max-w-6xl text-center text-muted-foreground">
-          <p>&copy; 2024 叶 Tuition Hub. All rights reserved.</p>
+          <p>&copy; 2024 Ye （叶）S （帅）Tuition. All rights reserved.</p>
         </div>
       </footer>
     </div>
