@@ -35,11 +35,11 @@ const ModuleManager = () => {
   const [editingModule, setEditingModule] = useState<Module | null>(null);
   const [formData, setFormData] = useState({
     subject_id: "",
-    parent_id: "",
+    parent_id: "__none", // internal sentinel for no parent
     title: "",
     description: "",
     content: "",
-    order_index: 0
+    order_index: 0,
   });
 
   useEffect(() => {
@@ -81,11 +81,11 @@ const ModuleManager = () => {
 
     const moduleData = {
       subject_id: formData.subject_id,
-      parent_id: formData.parent_id || null,
+      parent_id: formData.parent_id === "__none" ? null : formData.parent_id,
       title: formData.title,
       description: formData.description || null,
       content: formData.content || null,
-      order_index: formData.order_index
+      order_index: formData.order_index,
     };
 
     if (editingModule) {
@@ -120,11 +120,11 @@ const ModuleManager = () => {
     setEditingModule(module);
     setFormData({
       subject_id: module.subject_id,
-      parent_id: module.parent_id || "",
+      parent_id: module.parent_id ?? "__none",
       title: module.title,
       description: module.description || "",
       content: module.content || "",
-      order_index: module.order_index || 0
+      order_index: module.order_index || 0,
     });
     setDialogOpen(true);
   };
@@ -152,11 +152,11 @@ const ModuleManager = () => {
     setEditingModule(null);
     setFormData({
       subject_id: "",
-      parent_id: "",
+      parent_id: "__none",
       title: "",
       description: "",
       content: "",
-      order_index: 0
+      order_index: 0,
     });
   };
 
@@ -227,9 +227,9 @@ const ModuleManager = () => {
                     <SelectValue placeholder="None (top-level module)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None (top-level module)</SelectItem>
+                    <SelectItem value="__none">None (top-level module)</SelectItem>
                     {parentModules
-                      .filter(m => m.subject_id === formData.subject_id)
+                      .filter((m) => m.subject_id === formData.subject_id)
                       .map((module) => (
                         <SelectItem key={module.id} value={module.id}>
                           {module.title}
