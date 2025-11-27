@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { ArrowLeft, Download, FileText, Maximize2, MessageCircle, Send } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -379,13 +379,13 @@ const ModuleReader = () => {
             <CardContent className="space-y-6">
               {/* Ask Question Form */}
               <form onSubmit={handleSubmitQuestion} className="space-y-4">
-                <Textarea
-                  placeholder="Ask a question about this module..."
-                  value={newQuestion}
-                  onChange={(e) => setNewQuestion(e.target.value)}
-                  rows={3}
-                  className="resize-none"
-                />
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Your Question</label>
+                  <RichTextEditor
+                    content={newQuestion}
+                    onChange={setNewQuestion}
+                  />
+                </div>
                 <Button type="submit" disabled={submittingQuestion || !newQuestion.trim()}>
                   <Send className="h-4 w-4 mr-2" />
                   {submittingQuestion ? "Submitting..." : "Submit Question"}
@@ -404,7 +404,9 @@ const ModuleReader = () => {
                       <CardContent className="pt-6 space-y-4">
                         <div>
                           <div className="flex items-start justify-between mb-2">
-                            <p className="font-medium text-foreground">{q.question}</p>
+                            <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground">
+                              <div dangerouslySetInnerHTML={{ __html: q.question }} />
+                            </div>
                           </div>
                           <p className="text-xs text-muted-foreground">
                             Asked on {new Date(q.created_at).toLocaleDateString()}
@@ -412,7 +414,9 @@ const ModuleReader = () => {
                         </div>
                         {q.answer && (
                           <div className="pl-4 border-l-2 border-primary">
-                            <p className="text-sm text-foreground mb-2">{q.answer}</p>
+                            <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground mb-2">
+                              <div dangerouslySetInnerHTML={{ __html: q.answer }} />
+                            </div>
                             <p className="text-xs text-muted-foreground">
                               Answered on {q.answered_at && new Date(q.answered_at).toLocaleDateString()}
                             </p>

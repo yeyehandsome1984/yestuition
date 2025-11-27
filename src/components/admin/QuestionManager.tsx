@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { Badge } from "@/components/ui/badge";
 import { MessageCircle, Send } from "lucide-react";
 import { toast } from "sonner";
@@ -121,7 +121,9 @@ const QuestionManager = () => {
                     <div>
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex-1">
-                          <p className="font-medium text-foreground mb-2">{q.question}</p>
+                          <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground mb-2">
+                            <div dangerouslySetInnerHTML={{ __html: q.question }} />
+                          </div>
                           <Badge variant="outline" className="text-xs">
                             {q.modules?.subjects?.code} - {q.modules?.title}
                           </Badge>
@@ -135,13 +137,13 @@ const QuestionManager = () => {
 
                     {answeringId === q.id ? (
                       <div className="space-y-3">
-                        <Textarea
-                          placeholder="Type your answer here..."
-                          value={answerText}
-                          onChange={(e) => setAnswerText(e.target.value)}
-                          rows={4}
-                          className="resize-none"
-                        />
+                        <div>
+                          <label className="text-sm font-medium mb-2 block">Your Answer</label>
+                          <RichTextEditor
+                            content={answerText}
+                            onChange={setAnswerText}
+                          />
+                        </div>
                         <div className="flex gap-2">
                           <Button onClick={() => handleAnswer(q.id)}>
                             <Send className="h-4 w-4 mr-2" />
@@ -184,7 +186,9 @@ const QuestionManager = () => {
                     <div>
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex-1">
-                          <p className="font-medium text-foreground mb-2">{q.question}</p>
+                          <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground mb-2">
+                            <div dangerouslySetInnerHTML={{ __html: q.question }} />
+                          </div>
                           <Badge variant="outline" className="text-xs">
                             {q.modules?.subjects?.code} - {q.modules?.title}
                           </Badge>
@@ -197,7 +201,9 @@ const QuestionManager = () => {
                     </div>
 
                     <div className="pl-4 border-l-2 border-green-600">
-                      <p className="text-sm text-foreground mb-2">{q.answer}</p>
+                      <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground mb-2">
+                        <div dangerouslySetInnerHTML={{ __html: q.answer }} />
+                      </div>
                       <p className="text-xs text-muted-foreground">
                         Answered on {q.answered_at && new Date(q.answered_at).toLocaleDateString()}
                       </p>
