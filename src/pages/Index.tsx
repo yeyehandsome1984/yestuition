@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { BookOpen, FileText, Users, Download, Search } from "lucide-react";
+import { BookOpen, FileText, Users, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -113,18 +113,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Search Section */}
-      <section className="py-8 px-4 border-b">
-        <div className="container mx-auto max-w-6xl">
-          <div className="relative max-w-2xl mx-auto">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
-            <Input 
-              placeholder="Search modules, topics, or past papers..." 
-              className="pl-10 h-12 text-base"
-            />
-          </div>
-        </div>
-      </section>
 
       {/* Subjects Section */}
       <section className="py-16 px-4">
