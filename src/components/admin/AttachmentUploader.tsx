@@ -87,6 +87,11 @@ const AttachmentUploader = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!selectedSubject) {
+      toast.error("Please select a subject");
+      return;
+    }
+
     if (files.length === 0) {
       toast.error("Please select at least one file");
       return;
@@ -153,13 +158,14 @@ const AttachmentUploader = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="subject">Subject (Optional)</Label>
+              <Label htmlFor="subject">Subject *</Label>
               <Select
                 value={selectedSubject}
                 onValueChange={setSelectedSubject}
+                required
               >
                 <SelectTrigger id="subject">
-                  <SelectValue placeholder="Select a subject (optional)" />
+                  <SelectValue placeholder="Select a subject" />
                 </SelectTrigger>
                 <SelectContent>
                   {subjects.length === 0 ? (

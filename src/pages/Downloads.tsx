@@ -1,0 +1,197 @@
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import Navigation from "@/components/Navigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
+import { Download, File, ArrowLeft } from "lucide-react";
+
+interface Attachment {
+  id: string;
+  title: string;
+  file_name: string;
+  file_path: string;
+  file_type: string | null;
+  file_size: number | null;
+  created_at: string | null;
+  module_id: string | null;
+}
+
+interface Module {
+  id: string;
+  title: string;
+}
+
+interface Subject {
+  id: string;
+  code: string;
+  title: string;
+}
+
+const Downloads = () => {
+  const navigate = useNavigate();
+  const { subjectId } = useParams();
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [subject, setSubject] = useState<Subject | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    checkAuth();
+    if (subjectId) {
+      fetchSubject();
+      fetchAttachments();
+    }
+  }, [subjectId]);
+
+  const checkAuth = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      navigate("/auth");
+    }
+  };
+
+  const fetchSubject = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("subjects")
+        .select("id, code, title")
+        .eq("id", subjectId)
+        .single();
+
+      if (error) throw error;
+      setSubject(data);
+    } catch (error: any) {
+      toast.error("Failed to load subject");
+      console.error(error);
+    }
+  };
+
+  const fetchAttachments = async () => {
+    try {
+      // Get all modules for this subject
+      const { data: modules, error: modulesError } = await supabase
+        .from("modules")
+        .select("id")
+        .eq("subject_id", subjectId);
+
+      if (modulesError) throw modulesError;
+
+      const moduleIds = modules?.map(m => m.id) || [];
+
+      // Get attachments for these modules, plus attachments without a module that belong to this subject
+      const { data: attachmentsData, error: attachmentsError } = await supabase
+        .from("attachments")
+        .select("*")
+        .or(`module_id.in.(${moduleIds.join(",")}),module_id.is.null`)
+        .order("created_at", { ascending: false });
+
+      if (attachmentsError) throw attachmentsError;
+
+      setAttachments(attachmentsData || []);
+    } catch (error: any) {
+      toast.error("Failed to load attachments");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDownload = (attachment: Attachment) => {
+    // Placeholder for actual download functionality
+    toast.info(`Download functionality will be implemented when storage is configured`);
+    console.log("Download:", attachment);
+  };
+
+  const formatFileSize = (bytes: number | null) => {
+    if (!bytes) return "Unknown size";
+    const mb = bytes / (1024 * 1024);
+    return `${mb.toFixed(2)} MB`;
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-subtle">
+      <Navigation />
+      <main className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/subjects")}
+            className="mb-6"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Subjects
+          </Button>
+
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold mb-2 bg-gradient-primary bg-clip-text text-transparent">
+              {subject ? `${subject.code} - ${subject.title}` : "Downloads"}
+            </h1>
+            <p className="text-muted-foreground text-lg">
+              Access course materials and attachments
+            </p>
+          </div>
+
+          {loading ? (
+            <div className="space-y-4">
+              <Skeleton className="h-32" />
+              <Skeleton className="h-32" />
+              <Skeleton className="h-32" />
+            </div>
+          ) : attachments.length === 0 ? (
+            <Card>
+              <CardContent className="pt-6 text-center">
+                <File className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-muted-foreground">
+                  No attachments available for this subject yet.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {attachments.map((attachment) => (
+                <Card key={attachment.id} className="hover:shadow-elegant transition-shadow">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="text-lg">{attachment.title}</CardTitle>
+                        <CardDescription className="mt-1">
+                          {attachment.file_name}
+                        </CardDescription>
+                      </div>
+                      <Button
+                        onClick={() => handleDownload(attachment)}
+                        size="sm"
+                        className="ml-4"
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Download
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <File className="h-4 w-4" />
+                        {attachment.file_type || "Unknown type"}
+                      </div>
+                      <div>{formatFileSize(attachment.file_size)}</div>
+                      {attachment.created_at && (
+                        <div>
+                          Uploaded: {new Date(attachment.created_at).toLocaleDateString()}
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default Downloads;
