@@ -203,9 +203,9 @@ const ModuleManager = () => {
                   </SelectTrigger>
                   <SelectContent>
                     {subjects.length === 0 ? (
-                      <div className="p-2 text-sm text-muted-foreground">
+                      <SelectItem value="__no_subjects" disabled>
                         No subjects found. Create a subject first.
-                      </div>
+                      </SelectItem>
                     ) : (
                       subjects.map((subject) => (
                         <SelectItem key={subject.id} value={subject.id}>
