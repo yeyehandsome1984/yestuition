@@ -79,23 +79,40 @@ const Downloads = () => {
       const { data: modules, error: modulesError } = await supabase
         .from("modules")
         .select("id")
-        .eq("subject_id", subjectId);
+        .eq("subject_id", subjectId)
+        .is("deleted_at", null);
 
       if (modulesError) throw modulesError;
 
       const moduleIds = modules?.map(m => m.id) || [];
 
-      // Get attachments for these modules, plus attachments without a module that belong to this subject
+      // Get attachments through junction table for this subject's modules
+      const { data: attachmentLinks, error: linksError } = await supabase
+        .from("attachment_modules")
+        .select("attachment_id")
+        .in("module_id", moduleIds);
+
+      if (linksError) throw linksError;
+
+      const linkedAttachmentIds = attachmentLinks?.map(link => link.attachment_id) || [];
+
+      // Get all attachments (both linked and subject-level without modules)
       const { data: attachmentsData, error: attachmentsError } = await supabase
         .from("attachments")
         .select("*")
-        .or(`module_id.in.(${moduleIds.join(",")}),module_id.is.null`)
+        .is("deleted_at", null)
         .order("created_at", { ascending: false });
 
       if (attachmentsError) throw attachmentsError;
 
-      setAttachments(attachmentsData || []);
-      setFilteredAttachments(attachmentsData || []);
+      // Filter to only include attachments for this subject
+      // (either linked to subject's modules or subject-level attachments)
+      const subjectAttachments = attachmentsData?.filter(att => 
+        linkedAttachmentIds.includes(att.id) || !linkedAttachmentIds.length
+      ) || [];
+
+      setAttachments(subjectAttachments);
+      setFilteredAttachments(subjectAttachments);
     } catch (error: any) {
       toast.error("Failed to load attachments");
       console.error(error);
@@ -114,9 +131,9 @@ const Downloads = () => {
   };
 
   const handleDownload = (attachment: Attachment) => {
-    // Placeholder for actual download functionality
-    toast.info(`Download functionality will be implemented when storage is configured`);
-    console.log("Download:", attachment);
+    // Open file in new tab for download
+    window.open(attachment.file_path, '_blank');
+    toast.success("Download started");
   };
 
   const formatFileSize = (bytes: number | null) => {

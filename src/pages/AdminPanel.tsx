@@ -7,6 +7,7 @@ import { BookOpen, FileText, Paperclip, MessageCircle } from "lucide-react";
 import SubjectManager from "@/components/admin/SubjectManager";
 import ModuleManager from "@/components/admin/ModuleManager";
 import AttachmentUploader from "@/components/admin/AttachmentUploader";
+import AttachmentManager from "@/components/admin/AttachmentManager";
 import QuestionManager from "@/components/admin/QuestionManager";
 import { toast } from "sonner";
 
@@ -66,7 +67,7 @@ const AdminPanel = () => {
         </div>
 
         <Tabs defaultValue="subjects" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 max-w-3xl">
+          <TabsList className="grid w-full grid-cols-5 max-w-4xl">
             <TabsTrigger value="subjects" className="flex items-center gap-2">
               <BookOpen className="h-4 w-4" />
               Subjects
@@ -75,9 +76,13 @@ const AdminPanel = () => {
               <FileText className="h-4 w-4" />
               Modules
             </TabsTrigger>
+            <TabsTrigger value="upload" className="flex items-center gap-2">
+              <Paperclip className="h-4 w-4" />
+              Upload
+            </TabsTrigger>
             <TabsTrigger value="attachments" className="flex items-center gap-2">
               <Paperclip className="h-4 w-4" />
-              Attachments
+              Manage Files
             </TabsTrigger>
             <TabsTrigger value="questions" className="flex items-center gap-2">
               <MessageCircle className="h-4 w-4" />
@@ -109,7 +114,7 @@ const AdminPanel = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="attachments">
+          <TabsContent value="upload">
             <Card>
               <CardHeader>
                 <CardTitle>Upload Attachments</CardTitle>
@@ -119,6 +124,10 @@ const AdminPanel = () => {
                 <AttachmentUploader />
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="attachments">
+            <AttachmentManager />
           </TabsContent>
 
           <TabsContent value="questions">
