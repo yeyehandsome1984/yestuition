@@ -228,7 +228,7 @@ const ModuleReader = () => {
 
           <Card className="mb-6">
             <CardContent className="p-8">
-              <h1 className="text-3xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
                 {module.title}
               </h1>
               
@@ -244,7 +244,7 @@ const ModuleReader = () => {
 
               {/* Year Tested */}
               {(module.prelim_year_tested || module.a_level_year_tested) && (
-                <div className="mb-6 p-4 rounded-lg bg-accent/30 border border-border">
+                <div className="mb-6 p-4 rounded-lg border border-border">
                   <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
                     Year Tested
                   </h3>

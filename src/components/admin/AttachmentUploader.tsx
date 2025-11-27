@@ -26,6 +26,7 @@ const AttachmentUploader = () => {
   const [modules, setModules] = useState<Module[]>([]);
   const [selectedSubject, setSelectedSubject] = useState("");
   const [selectedModule, setSelectedModule] = useState("");
+  const [category, setCategory] = useState("Prelim & A level");
   const [title, setTitle] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -104,6 +105,7 @@ const AttachmentUploader = () => {
       // In production, you would upload to Supabase Storage first
       const attachments = files.map((file) => ({
         module_id: selectedModule || null,
+        category: category,
         title: title.trim() || file.name,
         file_name: file.name,
         file_path: `placeholder/${Date.now()}_${file.name}`,
@@ -123,6 +125,7 @@ const AttachmentUploader = () => {
       // Reset form
       setTitle("");
       setFiles([]);
+      setCategory("Prelim & A level");
       setSelectedModule("");
       setSelectedSubject("");
       
@@ -205,6 +208,26 @@ const AttachmentUploader = () => {
                       </SelectItem>
                     ))
                   )}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="category">Category *</Label>
+              <Select
+                value={category}
+                onValueChange={setCategory}
+                required
+              >
+                <SelectTrigger id="category">
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Tutorial & Note">Tutorial & Note</SelectItem>
+                  <SelectItem value="Prelim & A level">Prelim & A level</SelectItem>
+                  <SelectItem value="Revision">Revision</SelectItem>
+                  <SelectItem value="WA">WA (Weighted Assessment)</SelectItem>
+                  <SelectItem value="Others">Others</SelectItem>
                 </SelectContent>
               </Select>
             </div>

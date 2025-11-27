@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Download, File, ArrowLeft } from "lucide-react";
+import { Download, File, ArrowLeft, Filter } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 
 interface Attachment {
   id: string;
@@ -17,6 +19,7 @@ interface Attachment {
   file_size: number | null;
   created_at: string | null;
   module_id: string | null;
+  category: string;
 }
 
 interface Module {
@@ -34,6 +37,8 @@ const Downloads = () => {
   const navigate = useNavigate();
   const { subjectId } = useParams();
   const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [filteredAttachments, setFilteredAttachments] = useState<Attachment[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [subject, setSubject] = useState<Subject | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -90,11 +95,21 @@ const Downloads = () => {
       if (attachmentsError) throw attachmentsError;
 
       setAttachments(attachmentsData || []);
+      setFilteredAttachments(attachmentsData || []);
     } catch (error: any) {
       toast.error("Failed to load attachments");
       console.error(error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCategoryFilter = (category: string) => {
+    setSelectedCategory(category);
+    if (category === "all") {
+      setFilteredAttachments(attachments);
+    } else {
+      setFilteredAttachments(attachments.filter(att => att.category === category));
     }
   };
 
@@ -133,29 +148,53 @@ const Downloads = () => {
             </p>
           </div>
 
+          {!loading && attachments.length > 0 && (
+            <div className="mb-6 flex items-center gap-4">
+              <Filter className="h-5 w-5 text-muted-foreground" />
+              <Select value={selectedCategory} onValueChange={handleCategoryFilter}>
+                <SelectTrigger className="w-64">
+                  <SelectValue placeholder="Filter by category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="Tutorial & Note">Tutorial & Note</SelectItem>
+                  <SelectItem value="Prelim & A level">Prelim & A level</SelectItem>
+                  <SelectItem value="Revision">Revision</SelectItem>
+                  <SelectItem value="WA">WA (Weighted Assessment)</SelectItem>
+                  <SelectItem value="Others">Others</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           {loading ? (
             <div className="space-y-4">
               <Skeleton className="h-32" />
               <Skeleton className="h-32" />
               <Skeleton className="h-32" />
             </div>
-          ) : attachments.length === 0 ? (
+          ) : filteredAttachments.length === 0 ? (
             <Card>
               <CardContent className="pt-6 text-center">
                 <File className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                 <p className="text-muted-foreground">
-                  No attachments available for this subject yet.
+                  {attachments.length === 0 
+                    ? "No attachments available for this subject yet." 
+                    : "No attachments found for the selected category."}
                 </p>
               </CardContent>
             </Card>
           ) : (
             <div className="space-y-4">
-              {attachments.map((attachment) => (
+              {filteredAttachments.map((attachment) => (
                 <Card key={attachment.id} className="hover:shadow-elegant transition-shadow">
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <CardTitle className="text-lg">{attachment.title}</CardTitle>
+                        <div className="flex items-center gap-2 mb-2">
+                          <CardTitle className="text-lg">{attachment.title}</CardTitle>
+                          <Badge variant="secondary">{attachment.category}</Badge>
+                        </div>
                         <CardDescription className="mt-1">
                           {attachment.file_name}
                         </CardDescription>
