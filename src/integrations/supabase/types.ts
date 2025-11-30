@@ -61,6 +61,7 @@ export type Database = {
           file_type: string | null
           id: string
           module_id: string | null
+          subject_id: string | null
           title: string
           uploaded_by: string | null
         }
@@ -74,6 +75,7 @@ export type Database = {
           file_type?: string | null
           id?: string
           module_id?: string | null
+          subject_id?: string | null
           title: string
           uploaded_by?: string | null
         }
@@ -87,6 +89,7 @@ export type Database = {
           file_type?: string | null
           id?: string
           module_id?: string | null
+          subject_id?: string | null
           title?: string
           uploaded_by?: string | null
         }
@@ -96,6 +99,13 @@ export type Database = {
             columns: ["module_id"]
             isOneToOne: false
             referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attachments_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
             referencedColumns: ["id"]
           },
         ]

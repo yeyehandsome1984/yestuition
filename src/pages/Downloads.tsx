@@ -86,33 +86,32 @@ const Downloads = () => {
 
       const moduleIds = modules?.map(m => m.id) || [];
 
-      // Get attachments through junction table for this subject's modules
-      const { data: attachmentLinks, error: linksError } = await supabase
-        .from("attachment_modules")
-        .select("attachment_id")
-        .in("module_id", moduleIds);
+      // Get attachments linked to this subject's modules via junction table
+      let linkedAttachmentIds: string[] = [];
+      if (moduleIds.length > 0) {
+        const { data: attachmentLinks, error: linksError } = await supabase
+          .from("attachment_modules")
+          .select("attachment_id")
+          .in("module_id", moduleIds);
 
-      if (linksError) throw linksError;
+        if (linksError) throw linksError;
+        linkedAttachmentIds = attachmentLinks?.map(link => link.attachment_id) || [];
+      }
 
-      const linkedAttachmentIds = attachmentLinks?.map(link => link.attachment_id) || [];
-
-      // Get all attachments (both linked and subject-level without modules)
+      // Get all attachments for this subject:
+      // 1. Attachments linked to subject's modules (via junction table)
+      // 2. General attachments with subject_id matching current subject
       const { data: attachmentsData, error: attachmentsError } = await supabase
         .from("attachments")
         .select("*")
         .is("deleted_at", null)
+        .or(`id.in.(${linkedAttachmentIds.length > 0 ? linkedAttachmentIds.join(',') : ''}),subject_id.eq.${subjectId}`)
         .order("created_at", { ascending: false });
 
       if (attachmentsError) throw attachmentsError;
 
-      // Filter to only include attachments for this subject
-      // (either linked to subject's modules or subject-level attachments)
-      const subjectAttachments = attachmentsData?.filter(att => 
-        linkedAttachmentIds.includes(att.id) || !linkedAttachmentIds.length
-      ) || [];
-
-      setAttachments(subjectAttachments);
-      setFilteredAttachments(subjectAttachments);
+      setAttachments(attachmentsData || []);
+      setFilteredAttachments(attachmentsData || []);
     } catch (error: any) {
       toast.error("Failed to load attachments");
       console.error(error);
