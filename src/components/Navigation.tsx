@@ -15,16 +15,15 @@ const Navigation = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
-      
+
       if (session?.user) {
-        const { data: roles } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", session.user.id);
-        
-        const hasAccess = roles?.some(r => r.role === "admin" || r.role === "teacher");
+        const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", session.user.id);
+
+        const hasAccess = roles?.some((r) => r.role === "admin" || r.role === "teacher");
         setIsTeacherOrAdmin(hasAccess || false);
       } else {
         setIsTeacherOrAdmin(false);
@@ -33,7 +32,9 @@ const Navigation = () => {
 
     checkAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         checkAuth();
@@ -64,7 +65,7 @@ const Navigation = () => {
           {/* Logo */}
           <div className="flex items-center gap-2">
             <BookOpen className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold text-foreground">叶 Tuition Hub</span>
+            <span className="text-xl font-bold text-foreground">Yes Tuition Hub</span>
           </div>
 
           {/* Desktop Navigation */}
@@ -74,7 +75,7 @@ const Navigation = () => {
                 key={link.label}
                 href={link.href}
                 onClick={(e) => {
-                  if (link.href.startsWith('/')) {
+                  if (link.href.startsWith("/")) {
                     e.preventDefault();
                     navigate(link.href);
                   }
@@ -124,7 +125,7 @@ const Navigation = () => {
                     key={link.label}
                     href={link.href}
                     onClick={(e) => {
-                      if (link.href.startsWith('/')) {
+                      if (link.href.startsWith("/")) {
                         e.preventDefault();
                         navigate(link.href);
                         setIsOpen(false);
@@ -146,11 +147,24 @@ const Navigation = () => {
                     </>
                   ) : (
                     <>
-                      <Button variant="outline" className="w-full justify-start" onClick={() => { navigate("/auth"); setIsOpen(false); }}>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                        onClick={() => {
+                          navigate("/auth");
+                          setIsOpen(false);
+                        }}
+                      >
                         <User className="mr-2 h-4 w-4" />
                         Sign In
                       </Button>
-                      <Button className="w-full bg-accent hover:bg-accent/90" onClick={() => { navigate("/auth"); setIsOpen(false); }}>
+                      <Button
+                        className="w-full bg-accent hover:bg-accent/90"
+                        onClick={() => {
+                          navigate("/auth");
+                          setIsOpen(false);
+                        }}
+                      >
                         Get Started
                       </Button>
                     </>
