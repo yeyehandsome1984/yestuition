@@ -137,24 +137,16 @@ const Index = () => {
           ) : (
             <div className="grid md:grid-cols-2 gap-6">
               {subjects.map((subject) => (
-                <div
-                  key={subject.id}
-                  onClick={() => navigate(`/subjects/${subject.id}/modules`)}
-                  className="cursor-pointer"
-                >
-                  <SubjectCard {...subject} />
-                </div>
-              ))}
-            </div>
-          )}
-
-          {!loading && subjects.length > 0 && (
-            <div className="grid md:grid-cols-2 gap-6 mt-6">
-              {subjects.map((subject) => (
-                <div key={`downloads-${subject.id}`} className="flex justify-center">
+                <div key={subject.id} className="space-y-4">
+                  <div
+                    onClick={() => navigate(`/subjects/${subject.id}/modules`)}
+                    className="cursor-pointer"
+                  >
+                    <SubjectCard {...subject} />
+                  </div>
                   <Button
                     variant="outline"
-                    className="w-full max-w-md"
+                    className="w-full"
                     onClick={() => navigate(`/subjects/${subject.id}/downloads`)}
                   >
                     <Download className="mr-2 h-4 w-4" />
