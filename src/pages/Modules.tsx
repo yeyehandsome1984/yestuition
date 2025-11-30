@@ -29,13 +29,18 @@ interface Module {
   title: string;
   key_concept: string | null;
   order_index: number;
+  parent_id: string | null;
+}
+
+interface ModuleWithChildren extends Module {
+  children?: Module[];
 }
 
 const Modules = () => {
   const { subjectId } = useParams();
   const navigate = useNavigate();
   const [subject, setSubject] = useState<Subject | null>(null);
-  const [modules, setModules] = useState<Module[]>([]);
+  const [modules, setModules] = useState<ModuleWithChildren[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -52,7 +57,6 @@ const Modules = () => {
           .from("modules")
           .select("*")
           .eq("subject_id", subjectId)
-          .is("parent_id", null)
           .order("order_index"),
       ]);
 
@@ -60,7 +64,16 @@ const Modules = () => {
       if (modulesResult.error) throw modulesResult.error;
 
       setSubject(subjectResult.data);
-      setModules(modulesResult.data || []);
+      
+      // Build hierarchical structure
+      const allModules: Module[] = modulesResult.data || [];
+      const parentModules = allModules.filter(m => m.parent_id === null);
+      const hierarchicalModules: ModuleWithChildren[] = parentModules.map(parent => ({
+        ...parent,
+        children: allModules.filter(m => m.parent_id === parent.id).sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
+      }));
+      
+      setModules(hierarchicalModules);
     } catch (error: any) {
       toast.error("Failed to load content");
       console.error(error);
@@ -144,34 +157,70 @@ const Modules = () => {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-4">
               {modules.map((module, index) => (
-                <Card
-                  key={module.id}
-                  className="group hover:shadow-hover transition-all duration-300 cursor-pointer"
-                  onClick={() => navigate(`/modules/${module.id}`)}
-                >
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-semibold">
-                            {index + 1}
+                <div key={module.id} className="space-y-2">
+                  {/* Parent Module Card */}
+                  <Card
+                    className="group hover:shadow-hover transition-all duration-300 cursor-pointer"
+                    onClick={() => navigate(`/modules/${module.id}`)}
+                  >
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-semibold">
+                              {index + 1}
+                            </div>
+                            <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                              {module.title}
+                            </CardTitle>
                           </div>
-                          <CardTitle className="text-xl group-hover:text-primary transition-colors">
-                            {module.title}
-                          </CardTitle>
+                          {module.key_concept && (
+                            <CardDescription className="ml-11">
+                              {module.key_concept}
+                            </CardDescription>
+                          )}
                         </div>
-                        {module.key_concept && (
-                          <CardDescription className="ml-11">
-                            {module.key_concept}
-                          </CardDescription>
-                        )}
+                        <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
                       </div>
-                      <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                    </CardHeader>
+                  </Card>
+
+                  {/* Submodules nested underneath */}
+                  {module.children && module.children.length > 0 && (
+                    <div className="ml-8 space-y-2">
+                      {module.children.map((submodule, subIndex) => (
+                        <Card
+                          key={submodule.id}
+                          className="group hover:shadow-hover transition-all duration-300 cursor-pointer border-l-4 border-l-primary/30"
+                          onClick={() => navigate(`/modules/${submodule.id}`)}
+                        >
+                          <CardHeader className="py-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-3 mb-1">
+                                  <div className="flex items-center justify-center w-6 h-6 rounded-full bg-muted text-muted-foreground text-sm font-medium">
+                                    {index + 1}.{subIndex + 1}
+                                  </div>
+                                  <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                                    {submodule.title}
+                                  </CardTitle>
+                                </div>
+                                {submodule.key_concept && (
+                                  <CardDescription className="ml-9 text-sm">
+                                    {submodule.key_concept}
+                                  </CardDescription>
+                                )}
+                              </div>
+                              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                            </div>
+                          </CardHeader>
+                        </Card>
+                      ))}
                     </div>
-                  </CardHeader>
-                </Card>
+                  )}
+                </div>
               ))}
             </div>
           )}
