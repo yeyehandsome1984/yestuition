@@ -137,6 +137,7 @@ const AttachmentUploader = () => {
         file_path: uploadedFile.file_path,
         file_type: uploadedFile.file_type,
         file_size: uploadedFile.file_size,
+        subject_id: selectedSubject,
       }));
 
       const { data: insertedAttachments, error: insertError } = await supabase

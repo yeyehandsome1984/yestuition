@@ -142,12 +142,23 @@ const AttachmentManager = () => {
   const handleSaveEdit = async () => {
     if (!editingAttachment) return;
 
-    // Update attachment details
+    // Determine subject_id based on selected modules or selected subject
+    let subjectId = selectedSubject;
+    if (editFormData.selectedModuleIds.length > 0) {
+      // Get subject_id from the first selected module
+      const firstModule = modules.find(m => editFormData.selectedModuleIds.includes(m.id));
+      if (firstModule) {
+        subjectId = firstModule.subject_id;
+      }
+    }
+
+    // Update attachment details including subject_id
     const { error: updateError } = await supabase
       .from("attachments")
       .update({
         title: editFormData.title,
         category: editFormData.category,
+        subject_id: subjectId,
       })
       .eq("id", editingAttachment.id);
 
