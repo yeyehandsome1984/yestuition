@@ -31,9 +31,11 @@ const Index = () => {
   }, []);
 
   const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     if (!session) {
-      navigate('/auth');
+      navigate("/auth");
     }
   };
 
@@ -60,7 +62,7 @@ const Index = () => {
             ...subject,
             moduleCount: count || 0,
           };
-        })
+        }),
       );
 
       setSubjects(subjectsWithModules);
@@ -76,35 +78,35 @@ const Index = () => {
     {
       icon: BookOpen,
       title: "Structured Learning",
-      description: "Content organized in clear modules and submodules for progressive learning"
+      description: "Content organized in clear modules and submodules for progressive learning",
     },
     {
       icon: FileText,
       title: "Past Paper Examples",
-      description: "Access worked solutions from previous examination papers"
+      description: "Access worked solutions from previous examination papers",
     },
     {
       icon: Download,
       title: "Downloadable Resources",
-      description: "Download PDFs and study materials for offline access"
+      description: "Download PDFs and study materials for offline access",
     },
     {
       icon: Users,
       title: "Expert Content",
-      description: "Content created and curated by experienced educators"
-    }
+      description: "Content created and curated by experienced educators",
+    },
   ];
 
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      
+
       {/* Hero Section */}
       <section className="relative bg-gradient-hero text-primary-foreground py-20 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center space-y-6">
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight flex justify-center items-center gap-1">
-              <span>Ye（叶）S（帅）Tuition</span>
+              <span>Yes Tuition</span>
             </h1>
             <p className="text-xl md:text-2xl text-primary-foreground/90 max-w-2xl mx-auto">
               Your comprehensive platform for Principles of Accounting and Management of Business
@@ -113,19 +115,14 @@ const Index = () => {
         </div>
       </section>
 
-
       {/* Subjects Section */}
       <section className="py-16 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Available Subjects
-            </h2>
-            <p className="text-lg text-muted-foreground">
-              Choose a subject to explore comprehensive study materials
-            </p>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Available Subjects</h2>
+            <p className="text-lg text-muted-foreground">Choose a subject to explore comprehensive study materials</p>
           </div>
-          
+
           {loading ? (
             <div className="grid md:grid-cols-2 gap-6">
               {[1, 2].map((i) => (
@@ -138,10 +135,7 @@ const Index = () => {
             <div className="grid md:grid-cols-2 gap-6">
               {subjects.map((subject) => (
                 <div key={subject.id} className="space-y-4">
-                  <div
-                    onClick={() => navigate(`/subjects/${subject.id}/modules`)}
-                    className="cursor-pointer"
-                  >
+                  <div onClick={() => navigate(`/subjects/${subject.id}/modules`)} className="cursor-pointer">
                     <SubjectCard {...subject} />
                   </div>
                   <Button
@@ -166,11 +160,9 @@ const Index = () => {
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               Why Choose Ye （叶）S （帅）Tuition?
             </h2>
-            <p className="text-lg text-muted-foreground">
-              Everything you need for exam success in one place
-            </p>
+            <p className="text-lg text-muted-foreground">Everything you need for exam success in one place</p>
           </div>
-          
+
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, index) => (
               <FeatureCard key={index} {...feature} />
