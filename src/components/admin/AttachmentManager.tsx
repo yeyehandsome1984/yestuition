@@ -30,8 +30,17 @@ interface Attachment {
   category: string;
   file_size: number | null;
   created_at: string;
+  subject_id: string | null;
   linked_modules?: { module_id: string; module_title: string }[];
 }
+
+const CATEGORIES = [
+  "Tutorial & Note",
+  "Prelim & A level",
+  "Revision",
+  "WA",
+  "Others",
+];
 
 const AttachmentManager = () => {
   const [attachments, setAttachments] = useState<Attachment[]>([]);
@@ -44,6 +53,10 @@ const AttachmentManager = () => {
     selectedModuleIds: [] as string[],
   });
   const [selectedSubject, setSelectedSubject] = useState("");
+  
+  // Filter states
+  const [filterSubject, setFilterSubject] = useState("");
+  const [filterCategory, setFilterCategory] = useState("");
 
   useEffect(() => {
     fetchAttachments();
@@ -80,6 +93,7 @@ const AttachmentManager = () => {
 
         return {
           ...attachment,
+          subject_id: attachment.subject_id,
           linked_modules: links?.map((link: any) => ({
             module_id: link.module_id,
             module_title: link.modules?.title || "Unknown",
@@ -231,17 +245,59 @@ const AttachmentManager = () => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Manage Attachments</CardTitle>
-          <CardDescription>
-            Edit attachment details and link attachments to multiple modules
-          </CardDescription>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <CardTitle>Manage Attachments</CardTitle>
+              <CardDescription>
+                Edit attachment details and link attachments to multiple modules
+              </CardDescription>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Select value={filterSubject} onValueChange={setFilterSubject}>
+                <SelectTrigger className="w-[160px]">
+                  <SelectValue placeholder="All Subjects" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__all">All Subjects</SelectItem>
+                  {subjects.map((subject) => (
+                    <SelectItem key={subject.id} value={subject.id}>
+                      {subject.code}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={filterCategory} onValueChange={setFilterCategory}>
+                <SelectTrigger className="w-[160px]">
+                  <SelectValue placeholder="All Types" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__all">All Types</SelectItem>
+                  {CATEGORIES.map((cat) => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {attachments.length === 0 ? (
-              <p className="text-muted-foreground text-center py-8">No attachments found</p>
-            ) : (
-              attachments.map((attachment) => (
+            {(() => {
+              const filteredAttachments = attachments.filter((att) => {
+                const subjectMatch = !filterSubject || filterSubject === "__all" || att.subject_id === filterSubject;
+                const categoryMatch = !filterCategory || filterCategory === "__all" || att.category === filterCategory;
+                return subjectMatch && categoryMatch;
+              });
+              
+              if (filteredAttachments.length === 0) {
+                return <p className="text-muted-foreground text-center py-8">No attachments found</p>;
+              }
+              
+              return filteredAttachments.map((attachment) => {
+                const attachmentSubject = subjects.find(s => s.id === attachment.subject_id);
+                return (
                 <div
                   key={attachment.id}
                   className="flex items-center justify-between p-4 border rounded-lg"
@@ -251,6 +307,11 @@ const AttachmentManager = () => {
                       <File className="h-4 w-4 text-muted-foreground" />
                       <span className="font-medium">{attachment.title}</span>
                       <Badge variant="secondary">{attachment.category}</Badge>
+                      {attachmentSubject && (
+                        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30">
+                          {attachmentSubject.code}
+                        </Badge>
+                      )}
                     </div>
                     <p className="text-sm text-muted-foreground">{attachment.file_name}</p>
                     {attachment.linked_modules && attachment.linked_modules.length > 0 && (
@@ -280,8 +341,9 @@ const AttachmentManager = () => {
                     </Button>
                   </div>
                 </div>
-              ))
-            )}
+                );
+              });
+            })()}
           </div>
         </CardContent>
       </Card>
