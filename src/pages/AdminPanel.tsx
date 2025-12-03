@@ -106,7 +106,6 @@ const AdminPanel = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Manage Modules</CardTitle>
-                <CardDescription>Create and organize course modules and submodules</CardDescription>
               </CardHeader>
               <CardContent>
                 <ModuleManager />

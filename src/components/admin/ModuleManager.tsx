@@ -41,6 +41,8 @@ const ModuleManager = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [moduleToDelete, setModuleToDelete] = useState<string | null>(null);
   const [editingModule, setEditingModule] = useState<Module | null>(null);
+  const [filterSubject, setFilterSubject] = useState<string>("");
+  const [filterName, setFilterName] = useState<string>("");
   const [formData, setFormData] = useState({
     subject_id: "",
     parent_id: "__none", // internal sentinel for no parent
@@ -191,19 +193,28 @@ const ModuleManager = () => {
   
   const parentModules = Array.isArray(modules) ? modules.filter((m) => !m.parent_id) : [];
 
+  // Filter modules based on subject and name (independently)
+  const filteredModules = modules.filter((module) => {
+    const effectiveSubject = filterSubject === "__all" ? "" : filterSubject;
+    const matchesSubject = !effectiveSubject || module.subject_id === effectiveSubject;
+    const matchesName = !filterName || module.title.toLowerCase().includes(filterName.toLowerCase());
+    return matchesSubject && matchesName;
+  });
+
   if (loading) {
     return <div className="text-center py-8">Loading modules...</div>;
   }
 
   return (
     <div className="space-y-4">
-      <Dialog open={dialogOpen} onOpenChange={handleDialogChange}>
-        <DialogTrigger asChild>
-          <Button className="w-full sm:w-auto">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Module
-          </Button>
-        </DialogTrigger>
+      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+        <Dialog open={dialogOpen} onOpenChange={handleDialogChange}>
+          <DialogTrigger asChild>
+            <Button className="w-full sm:w-auto">
+              <Plus className="mr-2 h-4 w-4" />
+              Add Module
+            </Button>
+          </DialogTrigger>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingModule ? "Edit Module" : "Create New Module"}</DialogTitle>
@@ -347,7 +358,29 @@ const ModuleManager = () => {
             </DialogFooter>
           </form>
         </DialogContent>
-      </Dialog>
+        </Dialog>
+
+        <Select value={filterSubject} onValueChange={setFilterSubject}>
+          <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectValue placeholder="All Subjects" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__all">All Subjects</SelectItem>
+            {subjects.map((subject) => (
+              <SelectItem key={subject.id} value={subject.id}>
+                {subject.code}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Input
+          placeholder="Search by module name..."
+          value={filterName}
+          onChange={(e) => setFilterName(e.target.value)}
+          className="w-full sm:w-[220px]"
+        />
+      </div>
 
       <Dialog open={contentDialogOpen} onOpenChange={setContentDialogOpen}>
         <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
@@ -383,14 +416,14 @@ const ModuleManager = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {modules.length === 0 ? (
+            {filteredModules.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                  No modules found. Create your first module!
+                  {modules.length === 0 ? "No modules found. Create your first module!" : "No modules match your filters."}
                 </TableCell>
               </TableRow>
             ) : (
-              modules.map((module) => (
+              filteredModules.map((module) => (
                 <TableRow key={module.id}>
                   <TableCell className="font-medium">
                     {subjects.find((s) => s.id === module.subject_id)?.code}
