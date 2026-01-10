@@ -468,16 +468,28 @@ const ModuleManager = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will archive the module and all submodules. The data will be preserved but hidden from view. 
-              Click "Confirm Delete" again to proceed.
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <Trash2 className="h-5 w-5" />
+              Delete Module
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                You are about to delete the module: <strong className="text-foreground">
+                  {modules.find(m => m.id === moduleToDelete)?.title}
+                </strong>
+              </p>
+              <p>
+                This will archive the module and hide it from view. Any submodules will also be affected.
+              </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setModuleToDelete(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Confirm Delete
+            <AlertDialogAction 
+              onClick={handleDeleteConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete Module
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
